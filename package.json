@@ -1,0 +1,59 @@
+{
+  "name": "memory-porter",
+  "version": "0.1.0",
+  "description": "Local-first CLI that turns a ChatGPT or Claude data export into clean, human-readable memory files you own.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Briggs Ventures LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tempreon/memory-porter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tempreon/memory-porter/issues"
+  },
+  "homepage": "https://github.com/Tempreon/memory-porter#readme",
+  "bin": {
+    "memory-porter": "dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "start": "node --import tsx src/cli.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "chatgpt",
+    "claude",
+    "memory",
+    "export",
+    "data-portability",
+    "local-first",
+    "cli",
+    "ai-memory",
+    "privacy"
+  ],
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

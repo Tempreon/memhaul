@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# local test scratch / user data (never commit real exports or parsed memory)
+*.local
+/tmp-out/
+/out/
+out/
+memory/
+memory-out/
+*.export.zip
+*-export.zip
+# a real export dumped at the repo root — anchored so it never hides test/fixtures/
+/conversations.json
+/user.json
+
+# os / cloud-sync conflict copies (this workspace syncs; keep them out)
+.DS_Store
+* 2.*
+*\ 2.ts
+*\ 2.json
+
+# editor
+.vscode/
+.idea/
+
+# logs
+npm-debug.log*
+*.log

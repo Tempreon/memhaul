@@ -1,0 +1,119 @@
+[
+  {
+    "title": "Weekend trip",
+    "create_time": 1704067200.0,
+    "update_time": 1704070800.0,
+    "current_node": "n4",
+    "default_model_slug": "gpt-4o",
+    "mapping": {
+      "root": { "id": "root", "message": null, "parent": null, "children": ["n0"] },
+      "n0": {
+        "id": "n0",
+        "message": {
+          "id": "m0",
+          "author": { "role": "system", "name": null, "metadata": {} },
+          "create_time": 1704067200.0,
+          "content": { "content_type": "text", "parts": [""] },
+          "metadata": {
+            "is_user_system_message": true,
+            "user_context_message_data": {
+              "about_user_message": "I am a vegetarian and I live in Austin.",
+              "about_model_message": "Keep answers short and use bullet points."
+            }
+          }
+        },
+        "parent": "root",
+        "children": ["n1"]
+      },
+      "n1": {
+        "id": "n1",
+        "message": {
+          "id": "m1",
+          "author": { "role": "user" },
+          "create_time": 1704067260.0,
+          "content": { "content_type": "text", "parts": ["Remember that my daughter Emma is 7 and allergic to peanuts."] }
+        },
+        "parent": "n0",
+        "children": ["n2"]
+      },
+      "n2": {
+        "id": "n2",
+        "message": {
+          "id": "m2",
+          "author": { "role": "assistant" },
+          "create_time": 1704067320.0,
+          "content": { "content_type": "text", "parts": ["Noted."] }
+        },
+        "parent": "n1",
+        "children": ["n3"]
+      },
+      "n3": {
+        "id": "n3",
+        "message": {
+          "id": "m3",
+          "author": { "role": "user" },
+          "create_time": 1704067360.0,
+          "content": {
+            "content_type": "multimodal_text",
+            "parts": [
+              { "content_type": "image_asset_pointer", "asset_pointer": "file-service://file-abc" },
+              "Here is a photo, please note that I drive a blue Subaru."
+            ]
+          }
+        },
+        "parent": "n2",
+        "children": ["n4"]
+      },
+      "n4": {
+        "id": "n4",
+        "message": {
+          "id": "m4",
+          "author": { "role": "tool" },
+          "create_time": 1704067400.0,
+          "content": { "content_type": "code", "text": "{\"result\": \"ok\"}" }
+        },
+        "parent": "n3",
+        "children": []
+      }
+    }
+  },
+  {
+    "title": "Coding help",
+    "create_time": 1709900000.0,
+    "update_time": 1710000000.0,
+    "current_node": "c1",
+    "default_model_slug": "gpt-4o",
+    "mapping": {
+      "croot": { "id": "croot", "message": null, "parent": null, "children": ["c0"] },
+      "c0": {
+        "id": "c0",
+        "message": {
+          "id": "cm0",
+          "author": { "role": "system" },
+          "create_time": 1710000000.0,
+          "content": { "content_type": "text", "parts": [""] },
+          "metadata": {
+            "is_user_system_message": true,
+            "user_context_message_data": {
+              "about_user_message": "I prefer TypeScript and I work at Acme.",
+              "about_model_message": "Respond in a friendly, direct tone."
+            }
+          }
+        },
+        "parent": "croot",
+        "children": ["c1"]
+      },
+      "c1": {
+        "id": "c1",
+        "message": {
+          "id": "cm1",
+          "author": { "role": "user" },
+          "create_time": 1709900100.0,
+          "content": { "content_type": "text", "parts": ["How do I write a test in Node?"] }
+        },
+        "parent": "c0",
+        "children": []
+      }
+    }
+  }
+]

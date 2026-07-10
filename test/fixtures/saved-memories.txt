@@ -1,0 +1,13 @@
+Here are your saved memories:
+
+- User lives in Austin, Texas.
+- User lives in Denver.
+- User is allergic to penicillin.
+- User is currently training for a marathon.
+- User prefers TypeScript for backend work.
+- User's daughter Emma is 7 years old and starting second grade.
+- User's salary is $185,000 per year.
+- User's therapist is Dr. Chen.
+- User's OpenAI API key is sk-abcdefghijklmnopqrstuvwxyz0123456789.
+- User was arrested for a DUI in 2015.
+- Reach the user's assistant at jordan@example.com.
