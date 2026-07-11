@@ -43,8 +43,13 @@ If you find a security or privacy issue — especially anything where the tool
 could leak data off the machine, or where `audit` fails to flag obviously
 sensitive content — please open a private report rather than a public issue.
 
-Preferred: open a **private GitHub security advisory** on the repository. Alternatively email
-**security@tempreon.com**. We'll acknowledge within a few business days.
+**Preferred — private GitHub report:** use the repository's **"Report a vulnerability"** button
+(Security → Advisories → Report a vulnerability), which opens a private advisory only the maintainers
+can see.
+
+**Fallback — email:** if you can't use GitHub, write to **security@memhaul.com** (a monitored inbox).
+
+We'll acknowledge within a few business days.
 
 Please include: the version, your OS + Node version, a minimal synthetic export
 that reproduces it (never send real personal data), and what you expected vs. saw.

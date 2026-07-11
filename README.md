@@ -129,6 +129,13 @@ JSON is built in. Adding another output format (say, a portable-memory standard 
 never change. The point is portability: your memory shouldn't be trapped in *anyone's* format,
 including ours.
 
+## Support & contact
+
+- **Bugs & feature requests:** open a [GitHub issue](https://github.com/Tempreon/memory-porter/issues).
+  That's the primary support channel — please search existing issues first.
+- **General questions:** hello@memhaul.com
+- **Security / privacy:** see [SECURITY.md](SECURITY.md) (report privately, don't open a public issue).
+
 ## Install / develop
 
 Requires Node 18+ to run (Node 20+ to develop). Until it's on npm, run from source:
@@ -154,3 +161,5 @@ personal data.**
 ## License
 
 [MIT](LICENSE) © Briggs Ventures LLC
+
+<sub>Built by the team behind [Tempreon](https://tempreon.com). memory-porter is a standalone MIT tool and works completely on its own.</sub>
