@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        # Node 20 is EOL (Apr 2026); the test runner's glob (`node --test "test/**"`)
+        # needs Node 21+, so we test on the current supported LTS/Current.
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

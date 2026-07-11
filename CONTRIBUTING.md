@@ -48,7 +48,8 @@ npm test
 npm run build
 ```
 
-Requires Node 20+ for development (the built CLI runs on Node 18+).
+Requires Node 22+ for development (the test runner relies on `node --test` glob
+support, added in Node 21). The built CLI itself runs on Node 18+.
 
 ## Commit / PR conventions
 

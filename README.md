@@ -138,7 +138,7 @@ including ours.
 
 ## Install / develop
 
-Requires Node 18+ to run (Node 20+ to develop). Until it's on npm, run from source:
+Requires Node 18+ to run (Node 22+ to develop — the test runner uses `node --test` glob support). Until it's on npm, run from source:
 
 ```console
 git clone https://github.com/Tempreon/memory-porter
