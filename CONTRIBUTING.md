@@ -22,6 +22,18 @@ Implement `SourceAdapter` (`src/sources/types.ts`) and register it. Add a
 synthetic fixture under `test/fixtures/` and a test. Emitters and audit do not
 change — that's the point of the architecture (see `docs/adr/0001-architecture.md`).
 
+## Checking an adapter against a real export
+
+Export formats drift. To diff a real export's actual shape against what the Claude
+adapter assumes (field names / types / counts only — never your data, nothing
+written):
+
+```sh
+npm run verify:claude -- /path/to/your-claude-export.zip
+```
+
+Never commit a real export; the `.gitignore` already excludes common export paths.
+
 ## Adding an output format
 
 Implement `Emitter` (`src/emitters/types.ts`) and register it in

@@ -1,7 +1,10 @@
-# ADR 0002 — Open Memory Protocol alignment (OPEN — owner's call)
+# ADR 0002 — Open Memory Protocol alignment
 
-- Status: **Open / deferred.** This ADR documents the mapping and the tradeoff. It does **not** decide.
-- Date: 2026-07-10
+- Status: **Accepted** (2026-07-11). **Decision: keep our own markdown-first format and the
+  format-agnostic emitter seam (Posture B). OMP is a *possible future export target*, nothing more —
+  we do not adopt it as canonical and do not claim compatibility.** This ADR keeps the full mapping and
+  tradeoff analysis below as the record behind that call.
+- Date: 2026-07-10 (documented) · 2026-07-11 (ratified)
 
 ## Context
 
@@ -78,13 +81,14 @@ not from which schema sits at the center.** Adopting OMP as canonical buys littl
 interoperate with) and costs taxonomy fidelity; documenting the mapping (this ADR) buys the
 future-proofing at near-zero cost.
 
-## Recommendation (informative, not binding)
+## Decision (ratified 2026-07-11)
 
-Lean **Posture B** for v0.1 — which is also what we shipped: own markdown-first format, a format-agnostic
-emitter layer, and an `OmpEmitter` stub (`src/emitters/omp.ts`) that fails loudly and points here.
-Whether/when to implement that emitter, and whether to ever call ourselves an OMP reference
-implementation, is the owner's decision. Revisit if/when a portable-memory standard shows real
-multi-vendor adoption.
+**Posture B.** Own markdown-first format; keep the format-agnostic emitter layer and the `OmpEmitter`
+stub (`src/emitters/omp.ts`) that fails loudly and points here. OMP is treated as a *possible future
+export target only* — we will not adopt it as canonical and will not advertise compatibility. If and
+when a portable-memory standard shows real multi-vendor adoption, implementing the OMP emitter is a
+single change inside `src/emitters/omp.ts` (per the constraints in the section below); revisit then.
+This ADR is closed as accepted; the mapping and tradeoff below stand as the record.
 
 ## Consequence for the code
 

@@ -1,4 +1,5 @@
 import type { ExtractedMemory, MemoryItem } from '../model/memory.js';
+import { bridgeLine } from '../bridge.js';
 import type { PushResult, PushTarget } from './types.js';
 
 /**
@@ -32,15 +33,14 @@ export function toPortableRecords(memory: ExtractedMemory): PortableMemoryRecord
 /**
  * Push target for Tempreon.
  *
- * v0.1 status: the mapping is real and `--dry-run` shows exactly what would be
- * sent, but the live push is INTENTIONALLY not wired. There is not yet a clean,
- * documented public auth story for a third-party CLI to write memory into a
- * user's Tempreon account (see docs/adr/0003-tempreon-push-auth.md). Rather than
- * invent a token scheme we'd have to break, v0.1 ships the interface + dry run
- * and defers the live path.
- *
- * This keeps the headline guarantee true: memory-porter makes NO network calls
- * in v0.1.
+ * v0.1 status (fork F6, ratified 2026-07-11): memory-porter does NOT push from
+ * the CLI. v0.1 launches on the web-import path — the user brings the files in
+ * through Tempreon's web signup + bridge flow (see bridge.ts / ADR-0003), which
+ * is honest about not being one-click. This interface + the portable mapping are
+ * kept so `--dry-run` can show exactly what a future push WOULD send, and a live
+ * device-code-OAuth push is on the post-launch roadmap. Because nothing here
+ * calls the network, the headline guarantee holds: memory-porter makes NO
+ * network calls in v0.1.
  */
 export class TempreonPushTarget implements PushTarget {
   readonly name = 'tempreon';
@@ -58,10 +58,11 @@ export class TempreonPushTarget implements PushTarget {
         itemsPushed: 0,
         dryRun: true,
         message:
-          `Dry run: ${records.length} memory record(s) would be sent to Tempreon. ` +
-          'No network call was made. Re-run without --dry-run once push is enabled.',
+          `Dry run: ${records.length} portable record(s) shown below. memory-porter does not ` +
+          'push in v0.1 — no network call was made.\n' +
+          bridgeLine(),
         preview: {
-          endpoint: '(not configured — see docs/adr/0003-tempreon-push-auth.md)',
+          note: 'v0.1 has no CLI push (fork F6). Preview only — see docs/adr/0003-tempreon-push-auth.md.',
           count: records.length,
           records,
         },
@@ -69,10 +70,10 @@ export class TempreonPushTarget implements PushTarget {
     }
 
     throw new Error(
-      'Live Tempreon push is not enabled in v0.1. The payload mapping is ready ' +
-        '(try `--dry-run` to see exactly what would be sent), but the third-party ' +
-        'auth story is still being designed — see docs/adr/0003-tempreon-push-auth.md. ' +
-        'Until then, your memory stays in the local files memory-porter wrote.',
+      'memory-porter does not push to Tempreon in v0.1 — that is by design (fork F6): v0.1 ' +
+        'launches on the web-import path, not a CLI push.\n' +
+        bridgeLine() +
+        '\nRun `push --dry-run` to preview the portable records. See docs/adr/0003-tempreon-push-auth.md.',
     );
   }
 }

@@ -52,3 +52,13 @@ test('a value-taking flag with no value is a usage error, not a silent default',
   const a = parseArgs(['--out'], new Set());
   assert.throws(() => optString(a, 'out', 'memory'), /--out requires a value/);
 });
+
+test('Claude adapter tolerates a message whose content is a plain string', () => {
+  const dir = exportDir({
+    'conversations.json': JSON.stringify([
+      { chat_messages: [{ sender: 'human', content: 'Remember that I live in Reno.' }] },
+    ]),
+  });
+  const { memory } = parseExport(openArchive(dir), { source: 'claude', includeDerived: true });
+  assert.ok(memory.items.some((i) => i.kind === 'derived' && /reno/i.test(i.text)));
+});

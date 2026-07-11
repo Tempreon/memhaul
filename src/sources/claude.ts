@@ -15,7 +15,10 @@ interface RawClaudeMessage {
   text?: string;
   sender?: string; // "human" | "assistant"
   created_at?: string;
-  content?: { type?: string; text?: string }[];
+  // Authoritative content. Normally an array of typed blocks
+  // (text | thinking | tool_use | tool_result | voice_note); tolerated as a
+  // plain string for older/variant exports.
+  content?: { type?: string; text?: string }[] | string;
 }
 interface RawClaudeConversation {
   uuid?: string;
@@ -51,9 +54,10 @@ function safeJson<T>(text: string | undefined, warnings: string[], label: string
 
 function messageText(m: RawClaudeMessage): string {
   if (typeof m.text === 'string' && m.text.trim()) return m.text.trim();
+  if (typeof m.content === 'string') return m.content.trim();
   if (Array.isArray(m.content)) {
     return m.content
-      .map((b) => (b && typeof b.text === 'string' ? b.text : ''))
+      .map((b) => (b && typeof b.text === 'string' ? b.text : '')) // text/voice_note blocks; skips thinking/tool_*
       .filter(Boolean)
       .join('\n')
       .trim();

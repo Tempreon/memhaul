@@ -2,7 +2,7 @@
 
 **Turn your ChatGPT or Claude data export into clean, human-readable memory files you own.**
 
-Local-first. MIT-licensed. Zero telemetry. One dependency. `parse` and `audit` make **no network calls** — your export never leaves your machine.
+Local-first. MIT-licensed. Zero telemetry. One dependency. **No network calls** — your export never leaves your machine.
 
 > Here's the thing nobody tells you: **ChatGPT's official data export doesn't include your saved memories.** You have to copy them out of Settings by hand. Claude's the same. memory-porter is the tool that should already exist — it pulls together everything the export *does* give you, lets you paste in the memories it *doesn't*, and turns the whole thing into plain Markdown files that are yours to keep, edit, or move.
 
@@ -58,7 +58,7 @@ ChatGPT's export ships your whole chat history but **not** your Saved Memories �
 
 ```console
 $ memory-porter parse chatgpt-export.zip --memories my-memories.txt
-Extracted 17 memory item(s) from your ChatGPT export (11 saved, 2 instructions, 2 profile, 2 derived).
+Extracted 15 memory item(s) from your ChatGPT export (11 saved, 2 instructions, 2 profile).
 ```
 
 (Don't want to copy by hand? Ask ChatGPT *"Print all of my saved memories verbatim as a list"* and
@@ -92,7 +92,7 @@ contains *no text from your memory*, only counts and generic examples, so you ca
 ```
 memory-porter parse <export>   Parse an export into memory files
 memory-porter audit <export>   Report stale / sensitive / contradictory / third-party items
-memory-porter push  <export>   Push parsed memory to a target (opt-in; see below)
+memory-porter push  <export>   Preview the portable records (v0.1 does not push — see below)
 ```
 
 Useful flags: `--source chatgpt|claude|auto` (auto-detects by default), `--claude`, `--out <dir>`,
@@ -101,17 +101,25 @@ Useful flags: `--source chatgpt|claude|auto` (auto-detects by default), `--claud
 
 ## Your data stays yours
 
-- **`parse` and `audit` never touch the network.** No telemetry, no analytics, no uploads. You can
-  confirm it: there's no `fetch`, no HTTP/socket client, no `node:http`/`net`/`dns` — `grep -rn "fetch("
-  src/` comes up empty, and the only `http` strings in the source are doc links in comments.
-- The **only** command that can ever reach the network is `push`, and only when you run it against a
-  real target. In v0.1 `push` is dry-run only — it shows you exactly what *would* be sent and sends
-  nothing (see [`docs/adr/0003`](docs/adr/0003-tempreon-push-auth.md)).
+- **v0.1 makes no network calls at all** — not in `parse`, not in `audit`, not in `push`. No telemetry,
+  no analytics, no uploads. You can confirm it: there's no `fetch`, no HTTP/socket client, no
+  `node:http`/`net`/`dns` — `grep -rn "fetch(" src/` comes up empty, and the only `http` strings in the
+  source are doc links and the Tempreon website URL in comments/hints.
+- `push` does **not** push in v0.1 — it only previews the portable records that a future version could
+  send, and points you at the web flow below (see [`docs/adr/0003`](docs/adr/0003-tempreon-push-auth.md)).
 - Reads are non-destructive: your original export is never modified.
 - One runtime dependency ([`fflate`](https://github.com/101arrowz/fflate), to unzip). That's the whole
   supply chain.
 
 See [SECURITY.md](SECURITY.md) — and please handle your export like the sensitive file it is.
+
+## Bring it into Tempreon (optional)
+
+memory-porter is a standalone tool — the files it writes are yours and it needs nothing else. If you
+want that memory *living* inside Claude and ChatGPT (read back automatically, not just sitting in a
+folder), that's what [Tempreon](https://tempreon.com) does. It's a web flow, not a one-click import and
+not something this CLI does for you: you sign up (free), connect Tempreon inside your own assistant, and
+bring your memory in there. memory-porter itself sends nothing.
 
 ## An open format, on purpose
 

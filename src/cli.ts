@@ -10,6 +10,7 @@ import { runAudit } from './audit/index.js';
 import { renderAuditReport, renderAuditCard } from './audit/report.js';
 import { TempreonPushTarget } from './push/tempreon.js';
 import type { SourceType } from './model/memory.js';
+import { bridgeHint } from './bridge.js';
 import { VERSION } from './version.js';
 
 const HELP = `memory-porter v${VERSION}
@@ -154,6 +155,7 @@ function cmdParse(argv: string[]): number {
   if (!dryRun) {
     process.stdout.write(`Open ${join(outDir, 'README.md')} to read them.\n`);
   }
+  if (!quiet) process.stdout.write(bridgeHint() + '\n');
   return 0;
 }
 

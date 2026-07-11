@@ -1,0 +1,65 @@
+# Release workflow — DISARMED until you push a version tag AND set the NPM_TOKEN secret.
+# Nothing here runs on normal pushes/PRs; it only triggers on a `v*` tag you create.
+# Flow: tag (e.g. `git tag v0.1.0 && git push origin v0.1.0`) -> build + test -> publish
+# to npm, but ONLY if the NPM_TOKEN secret exists. Without the token it builds, tests,
+# and prints a notice instead of publishing.
+name: release
+
+on:
+  push:
+    tags:
+      # semver only — vanity/backup tags like v2-backup won't trigger a release
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      # Guard: the tag must match the package.json version, or we'd publish the wrong version.
+      - name: Verify tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag v$TAG does not match package.json version $PKG. Bump one to match, then re-tag."
+            exit 1
+          fi
+          echo "Tag and package version agree: $PKG"
+
+      - name: Check for NPM_TOKEN
+        id: token
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::NPM_TOKEN is not set — built and tested but NOT publishing. Add the secret and re-tag to publish."
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.token.outputs.present == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
