@@ -14,7 +14,7 @@ export interface PushResult {
 
 /**
  * A push target sends the parsed memory somewhere the user explicitly chooses.
- * This is the ONLY part of memory-porter allowed to touch the network, and only
+ * This is the ONLY part of memhaul allowed to touch the network, and only
  * when the user runs `push` with a real (non-dry-run) target. Everything else
  * is strictly local.
  */

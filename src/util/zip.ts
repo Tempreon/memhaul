@@ -128,7 +128,7 @@ export function openArchive(inputPath: string): Archive {
       throw new Error(
         `"${inputPath}" could not be unzipped (${(err as Error).message}). ` +
           'If it looks like a zip bomb or is corrupt, that is intentional; ' +
-          'if you already unzipped it, point memory-porter at the folder instead.',
+          'if you already unzipped it, point memhaul at the folder instead.',
       );
     }
     const entries = new Map<string, Uint8Array>();

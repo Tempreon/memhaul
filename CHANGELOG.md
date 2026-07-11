@@ -18,7 +18,7 @@ First working version. Built-not-launched.
   `--dry-run` only in v0.1 (no live network call); see `docs/adr/0003`.
 - Emitters: `markdown` (default) and `json`, behind a format-agnostic layer; an `omp` extension
   point stub (see `docs/adr/0002`).
-- Library API (`import { parseExport, runAudit } from 'memory-porter'`).
+- Library API (`import { parseExport, runAudit } from 'memhaul'`).
 - Synthetic test fixtures and a full test suite; strict TypeScript; CI on Node 20 + 22.
 
 ### Guarantees

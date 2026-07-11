@@ -3,7 +3,7 @@ import { bridgeLine } from '../bridge.js';
 import type { PushResult, PushTarget } from './types.js';
 
 /**
- * A neutral, portable representation of a memory record — what memory-porter
+ * A neutral, portable representation of a memory record — what memhaul
  * would hand to any hosted memory service. Intentionally generic: no vendor
  * internals, no proprietary fields. A service maps this onto its own schema.
  */
@@ -33,13 +33,13 @@ export function toPortableRecords(memory: ExtractedMemory): PortableMemoryRecord
 /**
  * Push target for Tempreon.
  *
- * v0.1 status (fork F6, ratified 2026-07-11): memory-porter does NOT push from
+ * v0.1 status (fork F6, ratified 2026-07-11): memhaul does NOT push from
  * the CLI. v0.1 launches on the web-import path — the user brings the files in
  * through Tempreon's web signup + bridge flow (see bridge.ts / ADR-0003), which
  * is honest about not being one-click. This interface + the portable mapping are
  * kept so `--dry-run` can show exactly what a future push WOULD send, and a live
  * device-code-OAuth push is on the post-launch roadmap. Because nothing here
- * calls the network, the headline guarantee holds: memory-porter makes NO
+ * calls the network, the headline guarantee holds: memhaul makes NO
  * network calls in v0.1.
  */
 export class TempreonPushTarget implements PushTarget {
@@ -58,7 +58,7 @@ export class TempreonPushTarget implements PushTarget {
         itemsPushed: 0,
         dryRun: true,
         message:
-          `Dry run: ${records.length} portable record(s) shown below. memory-porter does not ` +
+          `Dry run: ${records.length} portable record(s) shown below. memhaul does not ` +
           'push in v0.1 — no network call was made.\n' +
           bridgeLine(),
         preview: {
@@ -70,7 +70,7 @@ export class TempreonPushTarget implements PushTarget {
     }
 
     throw new Error(
-      'memory-porter does not push to Tempreon in v0.1 — that is by design (fork F6): v0.1 ' +
+      'memhaul does not push to Tempreon in v0.1 — that is by design (fork F6): v0.1 ' +
         'launches on the web-import path, not a CLI push.\n' +
         bridgeLine() +
         '\nRun `push --dry-run` to preview the portable records. See docs/adr/0003-tempreon-push-auth.md.',

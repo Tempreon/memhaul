@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking. memory-porter is intentionally small and intends to stay that
+Thanks for looking. memhaul is intentionally small and intends to stay that
 way. The best contributions keep it simple, local, and trustworthy.
 
 ## Principles (please don't break these)

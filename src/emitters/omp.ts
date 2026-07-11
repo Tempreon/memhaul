@@ -4,7 +4,7 @@ import type { Emitter, EmittedFile } from './types.js';
 /**
  * Open Memory Protocol emitter — INTENTIONALLY NOT WIRED in v0.1.
  *
- * The whole emitter layer exists so that aligning memory-porter's output with a
+ * The whole emitter layer exists so that aligning memhaul's output with a
  * portable-memory standard is a drop-in: implement `emit()` here against the
  * canonical model and register it in the emitter registry. Nothing else moves.
  *

@@ -13,11 +13,11 @@ import type { SourceType } from './model/memory.js';
 import { bridgeHint } from './bridge.js';
 import { VERSION } from './version.js';
 
-const HELP = `memory-porter v${VERSION}
+const HELP = `memhaul v${VERSION}
 Turn a ChatGPT or Claude data export into clean, human-readable memory files you own.
 
 USAGE
-  memory-porter <command> [options]
+  memhaul <command> [options]
 
 COMMANDS
   parse <export>      Parse an export into memory files (default: ./memory)
@@ -48,10 +48,10 @@ PUSH OPTIONS
   --dry-run           show the payload; make no network call
 
 EXAMPLES
-  memory-porter parse chatgpt-export.zip
-  memory-porter parse claude-export.zip --claude --out ./my-memory
-  memory-porter audit chatgpt-export.zip --card
-  memory-porter push chatgpt-export.zip --to tempreon --dry-run
+  memhaul parse chatgpt-export.zip
+  memhaul parse claude-export.zip --claude --out ./my-memory
+  memhaul audit chatgpt-export.zip --card
+  memhaul push chatgpt-export.zip --to tempreon --dry-run
 
 Everything runs locally. parse and audit make no network calls. Your export
 never leaves your machine unless you explicitly run a real push.
@@ -87,7 +87,7 @@ function requireInput(positional: string[], command: string): string {
   const input = positional[0];
   if (!input) {
     throw new UsageError(
-      `\`${command}\` needs a path to an export.\n  e.g. memory-porter ${command} chatgpt-export.zip`,
+      `\`${command}\` needs a path to an export.\n  e.g. memhaul ${command} chatgpt-export.zip`,
     );
   }
   return input;
@@ -250,7 +250,7 @@ async function main(argv: string[]): Promise<number> {
     case 'version':
     case '--version':
     case '-v':
-      process.stdout.write(`memory-porter v${VERSION}\n`);
+      process.stdout.write(`memhaul v${VERSION}\n`);
       return 0;
     case undefined:
     case 'help':
@@ -268,6 +268,6 @@ main(process.argv.slice(2))
   .then((code) => process.exit(code))
   .catch((err) => {
     const isUsage = err instanceof UsageError;
-    process.stderr.write(`\nmemory-porter: ${(err as Error).message}\n`);
+    process.stderr.write(`\nmemhaul: ${(err as Error).message}\n`);
     process.exit(isUsage ? 2 : 1);
   });

@@ -1,5 +1,5 @@
 {
-  "name": "memory-porter",
+  "name": "memhaul",
   "version": "0.1.0",
   "description": "Local-first CLI that turns a ChatGPT or Claude data export into clean, human-readable memory files you own.",
   "type": "module",
@@ -7,14 +7,14 @@
   "author": "Briggs Ventures LLC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tempreon/memory-porter.git"
+    "url": "git+https://github.com/Tempreon/memhaul.git"
   },
   "bugs": {
-    "url": "https://github.com/Tempreon/memory-porter/issues"
+    "url": "https://github.com/Tempreon/memhaul/issues"
   },
-  "homepage": "https://github.com/Tempreon/memory-porter#readme",
+  "homepage": "https://github.com/Tempreon/memhaul#readme",
   "bin": {
-    "memory-porter": "dist/cli.js"
+    "memhaul": "dist/cli.js"
   },
   "exports": {
     ".": "./dist/index.js"

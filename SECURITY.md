@@ -1,6 +1,6 @@
 # Security & privacy
 
-memory-porter is built around one promise: **your data stays yours, and stays local.**
+memhaul is built around one promise: **your data stays yours, and stays local.**
 
 ## What the tool does with your data
 
@@ -17,7 +17,7 @@ memory-porter is built around one promise: **your data stays yours, and stays lo
 
 ## Resource limits
 
-memory-porter is designed to parse *your own* export, which you trust. As a guard against a malformed
+memhaul is designed to parse *your own* export, which you trust. As a guard against a malformed
 or hostile archive, unzipping enforces size ceilings (per-file and total uncompressed) and refuses
 anything that looks like a zip bomb, and the directory walker does not follow symlinks. These are
 belt-and-suspenders limits, not a sandbox — parse archives you obtained yourself.

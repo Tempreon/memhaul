@@ -193,7 +193,7 @@ export function renderAuditCard(report: AuditReport, memory: ExtractedMemory): s
 
   out.push('---');
   out.push(
-    '<sub>Generated locally by memory-porter. This card contains **no text from your memory** — ' +
+    '<sub>Generated locally by memhaul. This card contains **no text from your memory** — ' +
       'only counts and generic examples. Safe to share. Nothing was sent anywhere.</sub>',
   );
   out.push('');

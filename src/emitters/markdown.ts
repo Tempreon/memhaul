@@ -99,7 +99,7 @@ function labelSource(source: ExtractedMemory['source']): string {
 }
 
 const FOOTER =
-  '\n<sub>Generated locally by [memory-porter](https://github.com/Tempreon/memory-porter). ' +
+  '\n<sub>Generated locally by [memhaul](https://github.com/Tempreon/memhaul). ' +
   'Your data never left this machine. Edit these files freely — they are yours.</sub>';
 
 function renderIndex(
@@ -158,7 +158,7 @@ function renderIndex(
   out.push('## Provenance');
   out.push('');
   out.push(provBits.map((b) => `- ${b}`).join('\n'));
-  out.push(`- Extracted by memory-porter v${memory.generatorVersion}`);
+  out.push(`- Extracted by memhaul v${memory.generatorVersion}`);
   out.push('');
 
   // Warnings — honesty about what we could not parse.
@@ -166,7 +166,7 @@ function renderIndex(
     out.push('## Notes & warnings');
     out.push('');
     out.push(
-      'memory-porter is conservative: when in doubt it tells you rather than guessing.',
+      'memhaul is conservative: when in doubt it tells you rather than guessing.',
     );
     out.push('');
     for (const w of memory.warnings) out.push(`- ${w}`);

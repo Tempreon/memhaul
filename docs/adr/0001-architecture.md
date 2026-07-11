@@ -5,7 +5,7 @@
 
 ## Context
 
-memory-porter parses AI-assistant data exports (ChatGPT, Claude, more later) into
+memhaul parses AI-assistant data exports (ChatGPT, Claude, more later) into
 clean, human-readable memory files. Two axes will keep growing independently:
 
 - **Sources** we can read (ChatGPT today, Claude today, Gemini / others later).

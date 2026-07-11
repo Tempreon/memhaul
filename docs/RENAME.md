@@ -1,38 +1,31 @@
-# Renaming the project (one-step)
+# Renaming the project
 
-The working name is `memory-porter`. Picking a final name is a single action.
+The project was renamed **`memory-porter` → `memhaul`** on 2026-07-11 (memhaul.com and the
+`@memhaul.com` inboxes are the project's own). This doc is retained in case it's ever renamed again.
 
-## Name shortlist (availability re-verified 2026-07-11)
+## One-step rename
 
-| Name | npm | PyPI | GitHub | .com | Verdict |
-| --- | --- | --- | --- | --- | --- |
-| **memhaul** | free | free | free | unregistered | **clear — recommended** |
-| **portamem** | free | free | free | unregistered | **clear — equal backup** |
-| memvoy | free | free | free | parked ("coming soon") | mostly-clear (.com owned) |
-| memtote | free | free | free | unregistered | mostly-clear (collides with `memote`, a Python CLI) |
-| memory-porter | free | free | free | unregistered | clear — safe fallback (working name) |
-
-Recommendation: **memhaul** (clean on every surface, on-theme). `portamem` is the equal backup.
-`memvoy`/`memtote` are usable but carry a small residual collision.
-
-## Do the rename
+`scripts/rename.mjs` replaces every literal occurrence of the current name (`memhaul`) with a new one
+across all tracked text files (package name, `bin`, URLs, docs, the generated-file footer). It skips
+itself, `node_modules`, `dist`, and binary/extension-less files.
 
 ```sh
-node scripts/rename.mjs memhaul     # replaces "memory-porter" everywhere in the repo
-npm run typecheck && npm test && npm run build   # confirm nothing broke
-git add -A && git commit -m "rename: memory-porter -> memhaul"
+node scripts/rename.mjs <new-name>                 # in-repo rename
+npm run typecheck && npm test && npm run build     # confirm nothing broke
+git add -A && git commit -m "rename: memhaul -> <new-name>"
 ```
 
-## The two steps a script can't do
+`<new-name>` must be a valid npm/GitHub name: lowercase letters, digits, hyphens; no leading hyphen.
 
-1. **GitHub** — rename the repo and repoint your local remote:
+## The two steps the script can't do
+
+1. **GitHub** — rename the repo and repoint the local remote:
    ```sh
-   gh repo rename memhaul -R Tempreon/memory-porter
-   git remote set-url origin https://github.com/Tempreon/memhaul.git
+   gh repo rename <new-name> -R Tempreon/memhaul
+   git remote set-url origin https://github.com/Tempreon/<new-name>.git
    git push
    ```
-2. **npm** — nothing to do until you publish; the new name is what ships. (If you ever reserved the old
-   name on npm, you don't need to unpublish — it was never published.)
+2. **npm** — nothing until you publish; the new name is what ships.
 
-That's it. The name flows through the CLI command, the package, all URLs, and the generated-file footer
+The name flows through the CLI command, the package, all URLs, and the generated-file footer
 automatically.

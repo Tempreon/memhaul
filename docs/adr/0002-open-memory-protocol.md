@@ -8,7 +8,7 @@
 
 ## Context
 
-memory-porter emits a small canonical memory model through a pluggable emitter layer
+memhaul emits a small canonical memory model through a pluggable emitter layer
 (ADR 0001). A natural question: should we align our output format with a portable-memory
 *standard* and position as a reference implementation, or ship our own format and treat any
 standard as one export target among several?

@@ -1,7 +1,7 @@
 /**
  * The one honest bridge from the local tool to the hosted product.
  *
- * memory-porter is a standalone, local tool: `parse` and `audit` never touch the
+ * memhaul is a standalone, local tool: `parse` and `audit` never touch the
  * network and the files it writes are the user's. This module is the ONLY place
  * that mentions Tempreon, and it is a plain invitation to a web flow — never a
  * claim of a one-click import and never an implication that the CLI pushes
@@ -20,7 +20,7 @@ export function bridgeHint(): string {
     '\nWant this memory living across Claude and ChatGPT — read back automatically,\n' +
     'not just sitting in a folder? That is what Tempreon does. Sign up (free),\n' +
     `connect your assistant, and bring these files in: ${TEMPREON_URL}\n` +
-    'memory-porter itself sends nothing — the files above are yours.'
+    'memhaul itself sends nothing — the files above are yours.'
   );
 }
 

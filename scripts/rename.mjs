@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// One-step local rename: replaces every literal "memory-porter" with your chosen
+// One-step local rename: replaces every literal occurrence of the current name (OLD, below) with your chosen
 // name across all tracked text files (package.json, README, src, docs, launch,
 // workflows, lockfile). Does NOT touch GitHub/npm — see docs/RENAME.md for the
 // two manual steps that must be done in those UIs/CLIs.
@@ -12,7 +12,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const OLD = 'memory-porter';
+const OLD = 'memhaul';
 const repoRoot = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const selfPath = fileURLToPath(import.meta.url);
 

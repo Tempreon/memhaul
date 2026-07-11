@@ -1,5 +1,5 @@
 /**
- * Public library API. `memory-porter` is primarily a CLI, but the parse/emit/
+ * Public library API. `memhaul` is primarily a CLI, but the parse/emit/
  * audit pipeline is usable programmatically too. Everything is local and pure;
  * nothing here touches the network.
  */

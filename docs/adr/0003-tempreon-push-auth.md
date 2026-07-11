@@ -9,7 +9,7 @@
 
 ## Context
 
-memory-porter's optional last step is `push`: send the parsed memory to a hosted memory service the
+memhaul's optional last step is `push`: send the parsed memory to a hosted memory service the
 user chooses. Tempreon is the first (and, in v0.1, only) target. `push` is the **one** command allowed
 to touch the network, and only on an explicit, non-dry-run run.
 
@@ -27,7 +27,7 @@ this tool's whole ethos argues against.
 ## Decision
 
 **v0.1 ships the interface, the payload mapping, and `--dry-run`. The live network call is not wired.**
-Selecting a real push errors with a pointer to this ADR. This keeps memory-porter's headline guarantee
+Selecting a real push errors with a pointer to this ADR. This keeps memhaul's headline guarantee
 literally true: **v0.1 makes no network calls at all.**
 
 `PushTarget` (`src/push/types.ts`) is the seam. When the auth story lands, implementing live push is a
@@ -49,7 +49,7 @@ at Tempreon's real web flow. That flow today is **not one-click** and the copy m
 
 The CLI hint therefore says something like *"want this memory living across Claude and ChatGPT? →
 https://tempreon.com"* — an invitation to the web flow, **never** a claim of a one-click import or an
-automatic push from the CLI. The files memory-porter wrote are what the user pastes/imports.
+automatic push from the CLI. The files memhaul wrote are what the user pastes/imports.
 
 ## Options for the live auth story (post-launch roadmap)
 
@@ -63,7 +63,7 @@ automatic push from the CLI. The files memory-porter wrote are what the user pas
    `TEMPREON_TOKEN` in their env (never a flag — flags leak into shell history). Simplest to build; weaker
    because it's long-lived and copy-pasteable. Acceptable as an interim if scoped narrowly and revocable.
 3. **Push *through* the user's existing MCP session.** If the user already has Tempreon connected as an
-   MCP server, memory-porter could hand records to that trusted channel rather than authenticating
+   MCP server, memhaul could hand records to that trusted channel rather than authenticating
    itself. Cleanest trust story (no new credential), but couples the CLI to an MCP client being present.
 
 ## Recommendation (post-launch)
