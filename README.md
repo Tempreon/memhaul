@@ -119,7 +119,7 @@ See [SECURITY.md](SECURITY.md) — and please handle your export like the sensit
 
 memhaul is a standalone tool — the files it writes are yours and it needs nothing else. If you
 want that memory *living* inside Claude and ChatGPT (read back automatically, not just sitting in a
-folder), that's what [Tempreon](https://tempreon.com) does. It's a web flow, not a one-click import and
+folder), that's what [Tempreon](https://tempreon.com/?utm_source=memhaul&utm_medium=referral) does. It's a web flow, not a one-click import and
 not something this CLI does for you: you sign up (free), connect Tempreon inside your own assistant, and
 bring your memory in there. memhaul itself sends nothing.
 
