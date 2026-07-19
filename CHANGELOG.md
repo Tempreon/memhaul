@@ -19,7 +19,12 @@ First working version. Built-not-launched.
 - Emitters: `markdown` (default) and `json`, behind a format-agnostic layer; an `omp` extension
   point stub (see `docs/adr/0002`).
 - Library API (`import { parseExport, runAudit } from 'memhaul'`).
-- Synthetic test fixtures and a full test suite; strict TypeScript; CI on Node 20 + 22.
+- Synthetic test fixtures and a full test suite; strict TypeScript; CI on Node 22 + 24.
+- Static channel attribution (`utm_source=memhaul`) on the printed Tempreon links, so web-side
+  analytics can tell CLI-originated visits apart. The parameter is constant — no user data.
+- Chunked ChatGPT exports: the Privacy Portal path splits large histories into
+  `conversations-000.json`, `conversations-001.json`, …; all chunks are now detected and merged
+  in order instead of only the exact `conversations.json` name being read.
 
 ### Guarantees
 - `parse` and `audit` make no network calls. No telemetry. One runtime dependency (`fflate`).

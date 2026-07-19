@@ -4,7 +4,9 @@
 
 Local-first. MIT-licensed. Zero telemetry. One dependency. **No network calls** — your export never leaves your machine.
 
-> Here's the thing nobody tells you: **ChatGPT's official data export doesn't include your saved memories.** You have to copy them out of Settings by hand. Claude's the same. memhaul is the tool that should already exist — it pulls together everything the export *does* give you, lets you paste in the memories it *doesn't*, and turns the whole thing into plain Markdown files that are yours to keep, edit, or move.
+> Here's the thing nobody tells you: **ChatGPT's official data export doesn't include your saved memories.** You have to copy them out of Settings by hand. Claude's the same. Gemini too — Saved Info never comes out through Google Takeout. memhaul is the tool that should already exist — it pulls together everything the export *does* give you, lets you paste in the memories it *doesn't*, and turns the whole thing into plain Markdown files that are yours to keep, edit, or move.
+
+![memhaul demo — parse a ChatGPT export into owned memory files, then audit them](launch/demo.gif)
 
 ---
 
