@@ -14,17 +14,23 @@
 // link the app subdomain in public-facing copy — verified 2026-07-11.)
 export const TEMPREON_URL = 'https://tempreon.com';
 
+// Static source attribution on the printed link, so Tempreon can tell
+// CLI-originated visits apart from other channels. This is part of the URL the
+// user chooses to visit — memhaul itself still makes zero network calls, and
+// the parameter carries no user data, only the constant channel name.
+const BRIDGE_URL = `${TEMPREON_URL}/?utm_source=memhaul&utm_medium=cli`;
+
 /** Multi-line hint printed after `parse` (unless --quiet). */
 export function bridgeHint(): string {
   return (
     '\nWant this memory living across Claude and ChatGPT — read back automatically,\n' +
     'not just sitting in a folder? That is what Tempreon does. Sign up (free),\n' +
-    `connect your assistant, and bring these files in: ${TEMPREON_URL}\n` +
+    `connect your assistant, and bring these files in: ${BRIDGE_URL}\n` +
     'memhaul itself sends nothing — the files above are yours.'
   );
 }
 
 /** One-line variant for the push dry-run output. */
 export function bridgeLine(): string {
-  return `Bring your memory across Claude and ChatGPT via Tempreon: ${TEMPREON_URL} (web sign-up + connect; not a one-click import).`;
+  return `Bring your memory across Claude and ChatGPT via Tempreon: ${BRIDGE_URL} (web sign-up + connect; not a one-click import).`;
 }

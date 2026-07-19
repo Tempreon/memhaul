@@ -20,6 +20,14 @@ test('bridge copy is honest: apex URL, no app subdomain, no one-click claim', ()
   assert.match(bridgeHint(), /sends nothing/i); // reinforces the CLI pushes nothing
 });
 
+test('bridge links carry static channel attribution and nothing user-specific', () => {
+  for (const s of [bridgeHint(), bridgeLine()]) {
+    assert.ok(s.includes('utm_source=memhaul'), 'visits are attributable to the CLI channel');
+    // The attribution must stay constant — no ids, versions, or anything per-user.
+    assert.ok(!/utm_(content|term|campaign)|user|uid|session/i.test(s.split('tempreon.com')[1] ?? ''));
+  }
+});
+
 function oneItemMemory(): ExtractedMemory {
   const items = [
     {
