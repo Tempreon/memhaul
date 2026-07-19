@@ -36,6 +36,21 @@ interface RawConversation {
   mapping?: Record<string, RawNode>;
 }
 
+/**
+ * All conversation files in the export, chunk-tolerant. The in-app Settings
+ * export ships a single `conversations.json`; the Privacy Portal path chunks
+ * large histories into `conversations-000.json`, `conversations-001.json`, ….
+ * Matching only the exact name would silently drop every chunk after the
+ * first, so we glob the documented pattern and merge, in name order.
+ */
+function conversationFiles(archive: Archive): string[] {
+  const chunk = /^conversations(?:-\d{1,5})?\.json$/i;
+  return archive
+    .files()
+    .filter((p) => chunk.test(p.split('/').pop() ?? ''))
+    .sort();
+}
+
 const MEMORY_MISSING_WARNING =
   'ChatGPT does NOT include your Saved Memories in its data export. To bring them in: ' +
   'open ChatGPT > Settings > Personalization > Memory > Manage memories, copy the list into a ' +
@@ -89,17 +104,20 @@ export class ChatGptAdapter implements SourceAdapter {
   readonly source = 'chatgpt' as const;
 
   detect(archive: Archive): number {
-    const convPath = archive.find('conversations.json');
-    if (!convPath) return 0;
-    // A bare conversations.json is NOT enough on its own — it stays below the
+    const convPaths = conversationFiles(archive);
+    if (!convPaths.length) return 0;
+    // A bare conversations file is NOT enough on its own — it stays below the
     // detection threshold so an ambiguous archive falls through to "pass
     // --source" rather than silently being treated as ChatGPT.
     let score = 0.15;
+    // Chunked conversations-NNN.json files only ever come from ChatGPT's
+    // Privacy Portal export, so more than one chunk is itself a marker.
+    if (convPaths.length > 1) score += 0.15;
     // ChatGPT-specific sibling files are positive markers.
     if (archive.find('user.json')) score += 0.15;
     if (archive.find('message_feedback.json') || archive.find('model_comparisons.json')) score += 0.15;
     // The decisive ChatGPT marker: conversations are objects with a "mapping" tree.
-    const text = archive.readText(convPath);
+    const text = archive.readText(convPaths[0]!);
     if (text) {
       const head = text.slice(0, 4000);
       if (/^\s*\[/.test(head) && head.includes('"mapping"')) score += 0.4;
@@ -137,17 +155,24 @@ export class ChatGptAdapter implements SourceAdapter {
     }
 
     // --- Conversations: custom instructions + count + derived ---
-    const convPath = archive.find('conversations.json');
-    const conversations =
-      safeJson<RawConversation[]>(
-        convPath ? archive.readText(convPath) : undefined,
-        warnings,
-        'conversations.json',
-      ) ?? [];
-    if (!Array.isArray(conversations)) {
-      warnings.push('conversations.json was not an array; skipping conversation parsing.');
+    // Merge every conversation file (single or Privacy-Portal chunks), in
+    // name order, so nothing after chunk 000 is silently dropped.
+    const convPaths = conversationFiles(archive);
+    const convList: RawConversation[] = [];
+    for (const path of convPaths) {
+      const parsed = safeJson<RawConversation[]>(archive.readText(path), warnings, path);
+      if (parsed === undefined) continue;
+      if (!Array.isArray(parsed)) {
+        warnings.push(`${path} was not an array; skipping it.`);
+        continue;
+      }
+      convList.push(...parsed);
     }
-    const convList = Array.isArray(conversations) ? conversations : [];
+    if (convPaths.length > 1) {
+      warnings.push(
+        `Merged ${convPaths.length} conversation files (a chunked Privacy Portal export).`,
+      );
+    }
 
     // Latest custom instructions across all conversations.
     let latestCi: { at: number; about_user?: string; about_model?: string; title?: string } | undefined;

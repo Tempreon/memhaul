@@ -73,3 +73,34 @@ test('item ids are stable across runs (diffable output)', () => {
     b.items.map((i) => i.id),
   );
 });
+
+// --- Chunked Privacy Portal exports (conversations-000.json, -001.json, …) ---
+
+const chunkedDir = fileURLToPath(
+  new URL('./fixtures/chatgpt-export-chunked', import.meta.url),
+);
+
+test('detects a chunked Privacy Portal export with no plain conversations.json', () => {
+  const d = detectSource(openArchive(chunkedDir));
+  assert.equal(d.source, 'chatgpt');
+  assert.ok(d.confidence >= 0.7, `confidence was ${d.confidence}`);
+});
+
+test('merges every conversation chunk instead of silently dropping all but the first', () => {
+  const { memory } = parseExport(openArchive(chunkedDir), {
+    source: 'chatgpt',
+    includeDerived: true,
+  });
+  // One conversation lives in each chunk — both must be seen.
+  assert.equal(memory.stats.conversationsSeen, 2);
+  assert.ok(memory.warnings.some((w) => /Merged 2 conversation files/i.test(w)));
+
+  // The NEWER chunk's custom instructions win across the chunk boundary.
+  const ci = memory.items.filter((i) => i.kind === 'custom_instruction').map((i) => i.text);
+  assert.ok(ci.some((t) => t.includes('switched from vinyl to streaming')), 'newest about_user wins');
+  assert.ok(!ci.some((t) => t.includes('I collect vinyl records')), 'older chunk CI superseded');
+
+  // Derived extraction reaches into chunk 000 too.
+  const derived = memory.items.filter((i) => i.kind === 'derived').map((i) => i.text);
+  assert.ok(derived.some((t) => t.includes('Rega Planar 3')), 'derived item from chunk 000');
+});

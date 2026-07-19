@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Newer chunked chat",
+    "create_time": 1712000000.0,
+    "update_time": 1712003600.0,
+    "current_node": "n1",
+    "mapping": {
+      "root": { "id": "root", "message": null, "parent": null, "children": ["n0"] },
+      "n0": {
+        "id": "n0",
+        "message": {
+          "id": "m0",
+          "author": { "role": "system", "name": null, "metadata": {} },
+          "create_time": 1712000000.0,
+          "content": { "content_type": "text", "parts": [""] },
+          "metadata": {
+            "is_user_system_message": true,
+            "user_context_message_data": {
+              "about_user_message": "I switched from vinyl to streaming.",
+              "about_model_message": "Plain prose, no haiku."
+            }
+          }
+        },
+        "parent": "root",
+        "children": ["n1"]
+      },
+      "n1": {
+        "id": "n1",
+        "message": {
+          "id": "m1",
+          "author": { "role": "user" },
+          "create_time": 1712000060.0,
+          "content": { "content_type": "text", "parts": ["What should I listen to tonight?"] }
+        },
+        "parent": "n0",
+        "children": []
+      }
+    }
+  }
+]

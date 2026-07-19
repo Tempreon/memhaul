@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Older chunked chat",
+    "create_time": 1704067200.0,
+    "update_time": 1704070800.0,
+    "current_node": "n1",
+    "mapping": {
+      "root": { "id": "root", "message": null, "parent": null, "children": ["n0"] },
+      "n0": {
+        "id": "n0",
+        "message": {
+          "id": "m0",
+          "author": { "role": "system", "name": null, "metadata": {} },
+          "create_time": 1704067200.0,
+          "content": { "content_type": "text", "parts": [""] },
+          "metadata": {
+            "is_user_system_message": true,
+            "user_context_message_data": {
+              "about_user_message": "I collect vinyl records.",
+              "about_model_message": "Answer in haiku only."
+            }
+          }
+        },
+        "parent": "root",
+        "children": ["n1"]
+      },
+      "n1": {
+        "id": "n1",
+        "message": {
+          "id": "m1",
+          "author": { "role": "user" },
+          "create_time": 1704067260.0,
+          "content": { "content_type": "text", "parts": ["Remember that my turntable is a Rega Planar 3."] }
+        },
+        "parent": "n0",
+        "children": []
+      }
+    }
+  }
+]
