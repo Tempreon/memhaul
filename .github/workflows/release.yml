@@ -22,6 +22,11 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required for npm provenance: lets the workflow request an OIDC token that
+      # sigstore uses to attest which repo + workflow built the published tarball.
+      id-token: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -60,6 +65,10 @@ jobs:
 
       - name: Publish to npm
         if: steps.token.outputs.present == 'true'
-        run: npm publish --access public
+        # --provenance publishes a sigstore attestation linking the tarball to this
+        # repo + workflow run, so `npm audit signatures` can verify it end-to-end.
+        # Note: provenance requires the source repo to be PUBLIC at publish time —
+        # push the release tag only after the repo visibility flip.
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
