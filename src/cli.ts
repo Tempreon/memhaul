@@ -31,7 +31,7 @@ PARSE OPTIONS
   --claude            shorthand for --source claude
   --out <dir>         output directory           (default: ./memory)
   --format <name>     ${AVAILABLE_FORMATS.join(' | ')}   (default: markdown)
-  --memories <file>   paste of your saved memories (ChatGPT/Claude don't export them)
+  --memories <file>   paste of your saved memories (needed for ChatGPT; older Claude exports)
   --include-derived   also emit memory inferred from conversations (guesses)
   --dry-run           show what would be written; write nothing
   --quiet             only print the summary line

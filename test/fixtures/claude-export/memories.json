@@ -1,0 +1,22 @@
+[
+  {
+    "account_uuid": "acct-synthetic-0001",
+    "conversations_memory": "# Memory\n\n## Summary\nWhat Claude has learned about Jordan across chats.\n\n## Details\n- Prefers TypeScript for new services.\n- Lives in Portland, Oregon.\n- Ships CLIs as a single static binary.\n",
+    "project_memories": {
+      "proj-synthetic-01": "- The CLI ships as one static binary.\n- Target Node 20+ at runtime.",
+      "proj-unknown-99": "- This project's name is not in the projects/ directory, so it stays a bare uuid label."
+    },
+    "memory_files": [
+      {
+        "path": "preferences/coding.md",
+        "content": "Uses two-space indentation and a functional style.",
+        "updated_at": "2026-05-14T10:00:00.000000Z"
+      },
+      {
+        "path": "people/priya.md",
+        "content": "Priya is Jordan's manager and prefers weekly written updates.",
+        "updated_at": "2026-06-02T09:30:00.000000Z"
+      }
+    ]
+  }
+]

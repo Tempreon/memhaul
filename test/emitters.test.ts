@@ -59,6 +59,29 @@ test('markdown output is deterministic', () => {
   assert.deepEqual(a, b);
 });
 
+test('markdown renders an updated date when an item carries updatedAt', () => {
+  const items: MemoryItem[] = [
+    {
+      id: makeItemId('claude', 'saved_memory', 'Uses two-space indentation.', 'preferences/coding.md'),
+      text: 'Uses two-space indentation.',
+      kind: 'saved_memory',
+      source: 'claude',
+      updatedAt: '2026-05-14T10:00:00.000000Z',
+      provenance: { file: 'memories.json', path: 'preferences/coding.md' },
+    },
+  ];
+  const memory: ExtractedMemory = {
+    source: 'claude',
+    generatorVersion: '0.1.0',
+    items,
+    warnings: [],
+    stats: computeStats(items, 0),
+  };
+  const saved = getEmitter('markdown').emit(memory).find((f) => f.path === 'saved-memories.md')!.content;
+  assert.match(saved, /updated 2026-05-14/);
+  assert.match(saved, /memories\.json · preferences\/coding\.md/);
+});
+
 test('json emitter round-trips the model', () => {
   const files = getEmitter('json').emit(m());
   assert.equal(files.length, 1);

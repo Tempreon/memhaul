@@ -4,7 +4,7 @@
 
 Local-first. MIT-licensed. Zero telemetry. One dependency. **No network calls** — your export never leaves your machine.
 
-> Here's the thing nobody tells you: **ChatGPT's official data export doesn't include your saved memories.** You have to copy them out of Settings by hand. Claude's the same. Gemini too — Saved Info never comes out through Google Takeout. memhaul is the tool that should already exist — it pulls together everything the export *does* give you, lets you paste in the memories it *doesn't*, and turns the whole thing into plain Markdown files that are yours to keep, edit, or move.
+> Here's the thing nobody tells you: **ChatGPT's official data export still doesn't include your saved memories** — you copy them out of Settings by hand, and Gemini's the same (Saved Info never comes out through Google Takeout). **Claude now *does* export your memory**, and memhaul turns that raw `memories.json` into plain Markdown files you own. Either way, memhaul is the tool that should already exist — it pulls together everything the export *does* give you, lets you paste in whatever it *doesn't*, and turns the whole thing into files that are yours to keep, edit, or move.
 
 ![memhaul demo — parse a ChatGPT export into owned memory files, then audit them](launch/demo.gif)
 
@@ -53,19 +53,29 @@ on exactly where it came from:
   added 2024-03-09 — source: conversations.json
 ```
 
-## The memories ChatGPT/Claude won't export
+## Memory: Claude exports it now, ChatGPT still doesn't
 
-ChatGPT's export ships your whole chat history but **not** your Saved Memories — those live only in
-**Settings → Personalization → Memory**. To bring them in, copy that list into a text file and:
+**Claude** now includes your memory in the data export — a `memories.json` holding your account
+memory, per-project memory, and structured memory files (each with its own path and timestamp).
+memhaul reads it natively, so a plain `parse` already brings your memory through:
+
+```console
+$ memhaul parse claude-export.zip --claude
+Extracted 24 memory item(s) from your Claude export (19 saved, 3 instructions, 2 profile).
+```
+
+**ChatGPT** ships your whole chat history but **not** your Saved Memories — those still live only in
+**Settings → Personalization → Memory**. Copy that list into a text file and pass it in:
 
 ```console
 $ memhaul parse chatgpt-export.zip --memories my-memories.txt
 Extracted 15 memory item(s) from your ChatGPT export (11 saved, 2 instructions, 2 profile).
 ```
 
-(Don't want to copy by hand? Ask ChatGPT *"Print all of my saved memories verbatim as a list"* and
-save the reply.) Claude is the same story — its memory lives in **Settings → Capabilities → "View and
-edit your memory."**
+(Don't want to copy by hand? Ask the assistant *"Print all of my saved memories verbatim as a
+list"* and save the reply.) The same `--memories` paste also covers **older Claude exports** that
+predate `memories.json`; for those, Claude's memory lives in **Settings → Memory**. (Counts above are
+illustrative — yours will differ.)
 
 ## See what your AI remembers about you — the `audit`
 

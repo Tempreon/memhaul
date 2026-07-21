@@ -27,6 +27,7 @@ interface RawClaudeConversation {
   updated_at?: string;
   chat_messages?: RawClaudeMessage[];
 }
+/** Legacy single `projects.json` array entry (older exports). */
 interface RawClaudeProject {
   uuid?: string;
   name?: string;
@@ -34,13 +35,40 @@ interface RawClaudeProject {
   created_at?: string;
   prompt_template?: string; // Claude project "custom instructions"
 }
+/** One `projects/<uuid>.json` file (2026+ exports — replaced projects.json). */
+interface RawClaudeProjectFile {
+  uuid?: string;
+  name?: string;
+  description?: string;
+  created_at?: string;
+  prompt_template?: string;
+  docs?: { uuid?: string; filename?: string; content?: string; created_at?: string }[];
+}
+/** One structured memory file inside `memories.json` (real path + timestamp). */
+interface RawMemoryFile {
+  path?: string;
+  content?: string;
+  updated_at?: string;
+}
+/** One account's entry in `memories.json` (Claude's exported memory store). */
+interface RawMemoriesEntry {
+  account_uuid?: string;
+  /** Account-level memory document — sectioned markdown. */
+  conversations_memory?: string;
+  /** Per-project memory, keyed by project uuid. */
+  project_memories?: Record<string, string>;
+  /** Structured per-file memory. */
+  memory_files?: RawMemoryFile[];
+}
 
+// Older Claude exports (pre-memory-in-export) carry no memories.json. This note
+// only fires when we found no memory in the export AND none was pasted — it tells
+// the user their export predates the change and how to bring memory in by hand.
 const MEMORY_NOTE =
-  "Claude's memory is NOT included in the data export. To bring it in: open Claude > Settings > " +
-  'Capabilities > "View and edit your memory", copy it into a text file, and re-run with ' +
-  '`--memories <file>`. (Or ask Claude in chat to write out its memory about you verbatim, and save ' +
-  'that.) The export also does not include project instructions or knowledge. What follows was ' +
-  'recovered from the export itself.';
+  "This export has no memories.json, so it predates Claude adding your memory to the export " +
+  '(newer exports include it automatically). To bring your Claude memory in from this one: open ' +
+  'Claude > Settings > Memory, copy it into a text file, and re-run with `--memories <file>`. ' +
+  '(Or ask Claude in chat to write out its memory about you verbatim, and save that.)';
 
 function safeJson<T>(text: string | undefined, warnings: string[], label: string): T | undefined {
   if (text === undefined) return undefined;
@@ -50,6 +78,31 @@ function safeJson<T>(text: string | undefined, warnings: string[], label: string
     warnings.push(`Could not parse ${label}: ${(err as Error).message}`);
     return undefined;
   }
+}
+
+function baseName(path: string): string {
+  return path.split('/').pop() ?? path;
+}
+
+const CONV_FILE_RE = /^conversations(?:-\d{1,5})?\.json$/i;
+/** Every conversation file, chunk- and batch-tolerant, in name order. */
+function conversationFiles(archive: Archive): string[] {
+  return archive.files().filter((p) => CONV_FILE_RE.test(baseName(p))).sort();
+}
+/** Every memories.json (one per batch of a multi-batch export), in name order. */
+function memoriesFiles(archive: Archive): string[] {
+  return archive.files().filter((p) => baseName(p).toLowerCase() === 'memories.json').sort();
+}
+const PROJECT_FILE_RE = /(?:^|\/)projects\/[^/]+\.json$/i;
+/** Every per-project `projects/<uuid>.json` file, in name order. */
+function projectFiles(archive: Archive): string[] {
+  return archive.files().filter((p) => PROJECT_FILE_RE.test(p)).sort();
+}
+
+/** Keep a timestamp string only if it parses as a date; preserve its precision. */
+function isoOrUndef(v: unknown): string | undefined {
+  if (typeof v !== 'string' || !v.trim()) return undefined;
+  return Number.isNaN(new Date(v).getTime()) ? undefined : v;
 }
 
 function messageText(m: RawClaudeMessage): string {
@@ -73,13 +126,16 @@ export class ClaudeAdapter implements SourceAdapter {
 
   detect(archive: Archive): number {
     let score = 0;
-    const convPath = archive.find('conversations.json');
+    const convPath = conversationFiles(archive)[0];
     if (convPath) {
       const head = archive.readText(convPath)?.slice(0, 4000) ?? '';
       if (head.includes('"chat_messages"')) score += 0.6;
       if (head.includes('"mapping"')) score -= 0.5; // that's ChatGPT
     }
-    if (archive.find('projects.json')) score += 0.25;
+    // memories.json and the per-project projects/ directory are Claude-only
+    // markers on current exports; projects.json is the legacy single-file form.
+    if (archive.find('memories.json')) score += 0.2;
+    if (archive.find('projects.json') || projectFiles(archive).length) score += 0.25;
     if (archive.find('users.json')) score += 0.15;
     return Math.max(0, Math.min(1, score));
   }
@@ -110,16 +166,20 @@ export class ClaudeAdapter implements SourceAdapter {
       }
     }
 
-    // --- Project custom instructions ---
-    const projPath = archive.find('projects.json');
-    const projects =
+    // --- Projects: names (to join project memory) + custom instructions ---
+    // uuid -> display name, populated from both the legacy projects.json array
+    // and the newer per-project projects/<uuid>.json files.
+    const projectNames = new Map<string, string>();
+
+    const legacyProjects =
       safeJson<RawClaudeProject[]>(
-        projPath ? archive.readText(projPath) : undefined,
+        archive.find('projects.json') ? archive.readText(archive.find('projects.json')!) : undefined,
         warnings,
         'projects.json',
       ) ?? [];
-    for (const p of Array.isArray(projects) ? projects : []) {
+    for (const p of Array.isArray(legacyProjects) ? legacyProjects : []) {
       if (!p || typeof p !== 'object') continue;
+      if (typeof p.uuid === 'string' && typeof p.name === 'string') projectNames.set(p.uuid, p.name);
       if (typeof p.prompt_template === 'string' && p.prompt_template.trim()) {
         items.push(
           instructionItem(
@@ -131,15 +191,90 @@ export class ClaudeAdapter implements SourceAdapter {
       }
     }
 
-    // --- Conversations: count + derived ---
-    const convPath = archive.find('conversations.json');
-    const conversations =
-      safeJson<RawClaudeConversation[]>(
-        convPath ? archive.readText(convPath) : undefined,
+    for (const path of projectFiles(archive)) {
+      const proj = safeJson<RawClaudeProjectFile>(archive.readText(path), warnings, path);
+      if (!proj || typeof proj !== 'object') continue;
+      if (typeof proj.uuid === 'string' && typeof proj.name === 'string') projectNames.set(proj.uuid, proj.name);
+      if (typeof proj.prompt_template === 'string' && proj.prompt_template.trim()) {
+        items.push(
+          instructionItem(
+            `Project "${proj.name ?? 'Untitled'}" instructions: ${proj.prompt_template.trim()}`,
+            proj.created_at,
+            path,
+          ),
+        );
+      }
+      // `docs` (project knowledge files) are deliberately not emitted as memory:
+      // they can be large and are project material, not memory about the user.
+      // The universal-sweep fallback (issue #13) is the right home for them.
+    }
+
+    // --- Native memory store from memories.json (2026+ exports) ---
+    const memPaths = memoriesFiles(archive);
+    let nativeMemoryItems = 0;
+    for (const memPath of memPaths) {
+      const parsed = safeJson<RawMemoriesEntry[] | RawMemoriesEntry>(
+        archive.readText(memPath),
         warnings,
-        'conversations.json',
-      ) ?? [];
-    const convList = Array.isArray(conversations) ? conversations : [];
+        memPath,
+      );
+      const entries = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+      for (const entry of entries) {
+        if (!entry || typeof entry !== 'object') continue;
+
+        // Account-level memory document: sectioned markdown. Split it through the
+        // shared paste parser so #12's section-tolerance improves this path too,
+        // instead of growing a second, divergent splitter here.
+        if (typeof entry.conversations_memory === 'string' && entry.conversations_memory.trim()) {
+          for (const text of parseSavedMemoriesText(entry.conversations_memory)) {
+            items.push(nativeSavedItem(text, memPath, 'account memory'));
+            nativeMemoryItems++;
+          }
+        }
+
+        // Structured per-file memory — real paths + timestamps, ideal provenance.
+        for (const f of entry.memory_files ?? []) {
+          if (!f || typeof f.content !== 'string' || !f.content.trim()) continue;
+          items.push(
+            nativeSavedItem(f.content.trim(), memPath, (f.path ?? '').trim() || 'memory file', isoOrUndef(f.updated_at)),
+          );
+          nativeMemoryItems++;
+        }
+
+        // Per-project memory, joined to the project's name where we have it.
+        const pm = entry.project_memories;
+        if (pm && typeof pm === 'object' && !Array.isArray(pm)) {
+          for (const [uuid, value] of Object.entries(pm)) {
+            if (typeof value !== 'string' || !value.trim()) continue;
+            const name = projectNames.get(uuid);
+            const label = name ? `project: ${name}` : `project ${uuid}`;
+            for (const text of parseSavedMemoriesText(value)) {
+              items.push(nativeSavedItem(text, memPath, label));
+              nativeMemoryItems++;
+            }
+          }
+        }
+      }
+    }
+    if (memPaths.length > 1) {
+      warnings.push(`Merged ${memPaths.length} memories.json files (a multi-batch export).`);
+    }
+
+    // --- Conversations: count + derived (chunk- and batch-tolerant) ---
+    const convPaths = conversationFiles(archive);
+    const convList: RawClaudeConversation[] = [];
+    for (const path of convPaths) {
+      const parsed = safeJson<RawClaudeConversation[]>(archive.readText(path), warnings, path);
+      if (parsed === undefined) continue;
+      if (!Array.isArray(parsed)) {
+        warnings.push(`${path} was not an array; skipping it.`);
+        continue;
+      }
+      convList.push(...parsed);
+    }
+    if (convPaths.length > 1) {
+      warnings.push(`Merged ${convPaths.length} conversation files (a chunked or multi-batch export).`);
+    }
 
     if (opts.includeDerived) {
       const seen = new Set<string>();
@@ -159,10 +294,15 @@ export class ClaudeAdapter implements SourceAdapter {
       }
     }
 
-    // --- Saved memories (paste) ---
-    if (opts.savedMemoriesText && opts.savedMemoriesText.trim()) {
-      for (const text of parseSavedMemoriesText(opts.savedMemoriesText)) items.push(savedItem(text));
-    } else {
+    // --- Saved memories (paste) — additive; supplements or stands in for the
+    // native store (older exports, or a fresher hand copy). Warn only when we
+    // ended up with no memory from anywhere. ---
+    const pasted = opts.savedMemoriesText?.trim() ? parseSavedMemoriesText(opts.savedMemoriesText) : [];
+    for (const text of pasted) items.push(savedItem(text));
+    if (opts.savedMemoriesText?.trim() && !pasted.length) {
+      warnings.push('The --memories file was provided but no memory lines were found in it.');
+    }
+    if (nativeMemoryItems === 0 && !pasted.length) {
       warnings.push(MEMORY_NOTE);
     }
 
@@ -189,12 +329,28 @@ function profileItem(text: string, file: string, path: string): MemoryItem {
 }
 function instructionItem(text: string, createdAt: string | undefined, file: string): MemoryItem {
   return {
-    id: makeItemId('claude', 'custom_instruction', text),
+    id: makeItemId('claude', 'custom_instruction', text, file),
     text,
     kind: 'custom_instruction',
     source: 'claude',
     ...(createdAt ? { createdAt } : {}),
     provenance: { file },
+  };
+}
+/** A memory item read straight from Claude's exported memory store. */
+function nativeSavedItem(
+  text: string,
+  file: string,
+  path: string,
+  updatedAt?: string,
+): MemoryItem {
+  return {
+    id: makeItemId('claude', 'saved_memory', text, path),
+    text,
+    kind: 'saved_memory',
+    source: 'claude',
+    ...(updatedAt ? { updatedAt } : {}),
+    provenance: { file, path, note: 'from your Claude memory, included in the export' },
   };
 }
 function savedItem(text: string): MemoryItem {

@@ -25,6 +25,14 @@ First working version. Built-not-launched.
 - Chunked ChatGPT exports: the Privacy Portal path splits large histories into
   `conversations-000.json`, `conversations-001.json`, …; all chunks are now detected and merged
   in order instead of only the exact `conversations.json` name being read.
+- Native Claude memory: Claude exports now include a `memories.json` (account memory, per-project
+  memory, and structured `memory_files` with paths + timestamps). memhaul reads it directly, so a
+  plain `parse` brings your memory through with no paste. Per-project instructions are read from the
+  `projects/<uuid>.json` directory (legacy single `projects.json` still supported); `--memories`
+  stays as an additive supplement and as the fallback for older exports. The stale "Claude doesn't
+  export memory" copy is corrected across the README, the adapter, and the docs.
+- Multi-batch Claude exports: pointed at one `…-batch-0000.zip`, memhaul now merges its
+  `…-batch-NNNN.zip` siblings so nothing after the first batch is silently dropped.
 
 ### Guarantees
 - `parse` and `audit` make no network calls. No telemetry. One runtime dependency (`fflate`).

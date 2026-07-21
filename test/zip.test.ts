@@ -45,3 +45,26 @@ test('reads an unzipped directory', () => {
 test('a bad path throws a helpful error', () => {
   assert.throws(() => openArchive('/no/such/path.zip'), /Cannot read/);
 });
+
+test('merges sibling -batch-NNNN.zip files, keeping colliding paths from every batch', () => {
+  const enc = (s: string) => new TextEncoder().encode(s);
+  const home = mkdtempSync(join(tmpdir(), 'mp-batch-'));
+  writeFileSync(join(home, 'x-batch-0000.zip'), zipSync({ 'a.json': enc('0'), 'shared.json': enc('zero') }));
+  writeFileSync(join(home, 'x-batch-0001.zip'), zipSync({ 'b.json': enc('1'), 'shared.json': enc('one') }));
+
+  // Pointed at any one batch, we see files from all of them.
+  const arc = openArchive(join(home, 'x-batch-0000.zip'));
+  const files = arc.files();
+  assert.ok(files.includes('a.json') && files.includes('b.json'), 'files from both batches');
+  // The colliding basename survives twice (the later batch under a stem prefix),
+  // so a basename glob still finds every copy and nothing is silently dropped.
+  assert.equal(files.filter((p) => p.endsWith('shared.json')).length, 2);
+});
+
+test('a lone -batch-NNNN.zip with no siblings opens normally', () => {
+  const enc = (s: string) => new TextEncoder().encode(s);
+  const home = mkdtempSync(join(tmpdir(), 'mp-batch1-'));
+  writeFileSync(join(home, 'solo-batch-0000.zip'), zipSync({ 'a.json': enc('0') }));
+  const arc = openArchive(join(home, 'solo-batch-0000.zip'));
+  assert.deepEqual(arc.files(), ['a.json']);
+});

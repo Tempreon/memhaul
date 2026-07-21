@@ -13,8 +13,10 @@ export interface ExtractOptions {
    * Raw text of the user's saved memories, pasted from a file. Needed for
    * ChatGPT, whose export does NOT contain the saved-memory store — the user
    * copies it from Settings > Personalization > Memory (or a "print my
-   * memories" prompt) into a text file and passes `--memories <file>`.
-   * Ignored by sources that already include memory in the export.
+   * memories" prompt) into a text file and passes `--memories <file>`. Also the
+   * fallback for older Claude exports predating memories.json. Where a source
+   * already includes memory in the export, this is additive (deduped), not
+   * ignored — a fresher hand copy can supplement it.
    */
   savedMemoriesText?: string;
 }

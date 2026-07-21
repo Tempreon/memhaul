@@ -32,8 +32,8 @@ const KIND_FILES: Record<
 /** Stable ordering so re-runs produce diffable files. */
 function sortItems(items: MemoryItem[]): MemoryItem[] {
   return [...items].sort((a, b) => {
-    const at = a.createdAt ?? '';
-    const bt = b.createdAt ?? '';
+    const at = a.createdAt ?? a.updatedAt ?? '';
+    const bt = b.createdAt ?? b.updatedAt ?? '';
     if (at !== bt) return at < bt ? -1 : 1;
     return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   });
@@ -54,6 +54,8 @@ function renderItem(item: MemoryItem): string {
   const meta: string[] = [];
   const created = fmtDate(item.createdAt);
   if (created) meta.push(`added ${created}`);
+  const updated = fmtDate(item.updatedAt);
+  if (updated && updated !== created) meta.push(`updated ${updated}`);
   if (item.confidence !== undefined) {
     meta.push(`confidence ${Math.round(item.confidence * 100)}%`);
   }

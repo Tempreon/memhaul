@@ -1,0 +1,15 @@
+{
+  "uuid": "proj-synthetic-01",
+  "name": "CLI Tools",
+  "description": "Command-line utilities",
+  "created_at": "2025-10-01T00:00:00.000000Z",
+  "prompt_template": "Always answer with concise, copy-pasteable shell commands. Prefer POSIX sh.",
+  "docs": [
+    {
+      "uuid": "doc-1",
+      "filename": "style.md",
+      "content": "Two-space indent; wrap at 100 columns.",
+      "created_at": "2025-10-02T00:00:00.000000Z"
+    }
+  ]
+}

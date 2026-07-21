@@ -18,13 +18,18 @@ import { parseExport, detectSource } from '../src/sources/index.js';
 
 // What the Claude adapter (src/sources/claude.ts) actually reads:
 const ADAPTER_READS = {
-  files: ['conversations.json', 'users.json', 'projects.json'],
+  files: ['conversations.json', 'users.json', 'projects.json', 'memories.json'],
   conversation: ['uuid', 'name', 'created_at', 'updated_at', 'account', 'project_uuid', 'chat_messages'],
   message: ['uuid', 'sender', 'text', 'content', 'created_at'],
   contentBlock: ['type', 'text'],
   users: ['email_address', 'email', 'full_name', 'name'],
   project: ['uuid', 'name', 'description', 'created_at', 'prompt_template'],
+  memories: ['account_uuid', 'conversations_memory', 'project_memories', 'memory_files'],
 };
+// Read via glob rather than a fixed basename, so per-account uuid filenames
+// don't show up as "ignored": per-project instructions and design-chat files.
+const READS_GLOB = /(?:^|\/)projects\/[^/]+\.json$/i; // projects/<uuid>.json — read
+const IGNORED_GLOB = /(?:^|\/)design_chats\/[^/]+\.json$/i; // design_chats/<uuid>.json — knowingly ignored (issue #13)
 
 function typeOf(v: unknown): string {
   if (v === null) return 'null';
@@ -70,9 +75,16 @@ function main(): void {
   if (files.length > 40) console.log(`  … and ${files.length - 40} more`);
 
   const missingFiles = ADAPTER_READS.files.filter((f) => !arc.find(f));
-  const extraFiles = files.map((f) => f.split('/').pop()!).filter((b) => /\.json$/.test(b) && !ADAPTER_READS.files.includes(b));
-  if (missingFiles.length) console.log(`\n⚠ files the adapter looks for but not found: ${missingFiles.join(', ')} (expected — Claude exports are thin; adapter handles absence)`);
-  if (extraFiles.length) console.log(`ℹ extra .json files the adapter ignores: ${[...new Set(extraFiles)].join(', ')}`);
+  const projectFilesSeen = files.filter((f) => READS_GLOB.test(f)).length;
+  const designChatsSeen = files.filter((f) => IGNORED_GLOB.test(f)).length;
+  const extraFiles = files
+    .filter((f) => !READS_GLOB.test(f) && !IGNORED_GLOB.test(f))
+    .map((f) => f.split('/').pop()!)
+    .filter((b) => /\.json$/.test(b) && !ADAPTER_READS.files.includes(b));
+  if (missingFiles.length) console.log(`\n⚠ files the adapter looks for but not found: ${missingFiles.join(', ')} (expected — older/thin exports lack some; adapter handles absence)`);
+  if (projectFilesSeen) console.log(`ℹ projects/<uuid>.json files read for instructions + names: ${projectFilesSeen}`);
+  if (designChatsSeen) console.log(`ℹ design_chats/<uuid>.json files knowingly ignored (issue #13): ${designChatsSeen}`);
+  if (extraFiles.length) console.log(`ℹ other .json files the adapter ignores: ${[...new Set(extraFiles)].join(', ')}`);
 
   const det = detectSource(arc);
   console.log(`\nDetection: source=${det.source ?? '(none)'} confidence=${Math.round(det.confidence * 100)}% scores=${JSON.stringify(det.scores)}`);
@@ -109,6 +121,32 @@ function main(): void {
     diffSection('Message fields', keysWithTypes(messages), ADAPTER_READS.message);
     console.log(`\n  sender values seen: ${[...senders].join(', ') || '(none)'}  (adapter treats "human" as the user)`);
     console.log(`  content block types seen: ${[...blockTypes].join(', ') || '(none/flat text)'}  (adapter extracts text from "text"/flat-text blocks)`);
+  }
+
+  // memories.json — the exported memory store (issue #11). Shapes/counts only.
+  const memPath = arc.find('memories.json');
+  if (!memPath) {
+    console.log('\n## memories.json\n  (absent — older export; adapter falls back to the --memories paste note)');
+  } else {
+    let mem: unknown;
+    try {
+      mem = JSON.parse(arc.readText(memPath)!);
+    } catch (e) {
+      mem = undefined;
+      console.log(`\n## memories.json\n  ⚠ did not parse: ${(e as Error).message}`);
+    }
+    const arr = (Array.isArray(mem) ? mem : mem ? [mem] : []) as Record<string, unknown>[];
+    if (arr.length) {
+      console.log(`\n## memories.json`);
+      console.log(`  accounts: ${arr.length}`);
+      diffSection('memories.json entry fields', keysWithTypes(arr), ADAPTER_READS.memories);
+      for (const [i, e] of arr.entries()) {
+        const cm = typeof e['conversations_memory'] === 'string' ? (e['conversations_memory'] as string).length : 0;
+        const pm = e['project_memories'] && typeof e['project_memories'] === 'object' ? Object.keys(e['project_memories'] as object).length : 0;
+        const mf = Array.isArray(e['memory_files']) ? (e['memory_files'] as unknown[]).length : 0;
+        console.log(`  [${i}] conversations_memory: ${cm} chars, project_memories: ${pm} keys, memory_files: ${mf}`);
+      }
+    }
   }
 
   // Finally, run the real adapter and report what it produced.
