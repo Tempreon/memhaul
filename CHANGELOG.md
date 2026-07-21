@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.1] — 2026-07-21
+
+Docs-only release, no code changes. The README inside the 0.1.0 tarball still carried the
+pre-publish "Not on npm yet" note (it was fixed in the repo minutes after publishing, but the
+npm page shows the README that shipped in the tarball). Republished so the npm page reads true.
+
 ## [0.1.0] — 2026-07-21
 
 First public release.
