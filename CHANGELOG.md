@@ -2,15 +2,16 @@
 
 All notable changes to this project are documented here.
 
-## [0.1.0] — unreleased
+## [0.1.0] — 2026-07-21
 
-First working version. Built-not-launched.
+First public release.
 
 ### Added
 - `parse` — turn a ChatGPT or Claude data export into clean, human-readable Markdown memory files.
   Auto-detects the source; reads custom instructions and profile from the export; accepts pasted
-  saved memories (`--memories`) since ChatGPT and Claude do not export the memory store itself;
-  optional inferred `derived` candidates (`--include-derived`).
+  saved memories (`--memories`) for ChatGPT, whose export omits the memory store (Claude's
+  exported memory is read natively — see below); optional inferred `derived` candidates
+  (`--include-derived`).
 - `audit` — flag stale, contradictory, sensitive, and third-party items with a deterministic,
   offline, explainable rubric. Writes a full local report and an opt-in redacted, shareable card
   (`--card`) that contains no raw memory text.

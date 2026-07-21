@@ -12,10 +12,8 @@ Local-first. MIT-licensed. Zero telemetry. One dependency. **No network calls** 
 
 ## 30-second quickstart
 
-> **Not on npm yet.** The examples below write `memhaul …` for readability. Until it's
-> published, run it from source (see [Install / develop](#install--develop)): use `node dist/cli.js …`
-> (or `npm start -- …`) in place of `memhaul`. Once published, `npx memhaul …` will work
-> directly.
+> Run it instantly with `npx memhaul …`, or install it with `npm i -g memhaul`. No account,
+> no signup — it's all local.
 
 ```console
 $ memhaul parse chatgpt-export.zip
@@ -168,7 +166,14 @@ including ours.
 
 ## Install / develop
 
-Requires Node 20+ to run (tested on 22 and 24; Node 22+ to develop — the test runner uses `node --test` glob support). Until it's on npm, run from source:
+Requires Node 20+ to run (tested on 22 and 24; Node 22+ to develop — the test runner uses `node --test` glob support).
+
+```console
+npx memhaul parse chatgpt-export.zip   # run without installing
+npm i -g memhaul                       # or install globally
+```
+
+To develop from source:
 
 ```console
 git clone https://github.com/Tempreon/memhaul
