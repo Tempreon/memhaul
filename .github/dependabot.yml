@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Dev dependencies + CI actions only get routine bumps. The runtime dependency
+  # count is a feature (fflate and nothing else — see CONTRIBUTING.md); Dependabot
+  # security alerts still cover it, but version bumps to runtime deps deserve a
+  # human/steward decision, not automation.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-type: development
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

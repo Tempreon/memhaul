@@ -56,3 +56,10 @@ support, added in Node 21). The built CLI itself runs on Node 18+.
 - Keep PRs focused. One source, one format, or one fix at a time.
 - Include or update a synthetic fixture + test for any parsing change.
 - Run `npm run typecheck && npm test` before opening a PR.
+
+## Developer Certificate of Origin
+
+By contributing, you certify the [Developer Certificate of Origin](https://developercertificate.org/):
+that you wrote the contribution or otherwise have the right to submit it under this
+project's MIT license. Sign-off is expressed by submitting the PR — no extra ceremony,
+no CLA. If you're contributing on an employer's time, make sure you're allowed to.
