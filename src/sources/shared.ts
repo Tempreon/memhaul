@@ -36,3 +36,61 @@ export function parseSavedMemoriesText(text: string): string[] {
   }
   return out;
 }
+
+// ChatGPT's two custom-instruction prompts, as they appear in the UI. Matched
+// leniently (leading marker allowed, trailing text/"?" allowed) so a paste that
+// happens to include the labels is split into the right two buckets.
+const ABOUT_USER_LABEL = /^[-*•#>\s]*what would you like chatgpt to know about you\b.*$/i;
+const ABOUT_MODEL_LABEL = /^[-*•#>\s]*how would you like chatgpt to respond\b.*$/i;
+
+/** One line to a clean single-line string (internal newlines → spaces). */
+function collapseBlock(s: string): string {
+  return s.replace(/\s*\n\s*/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Parse a pasted custom-instructions blob into framed instruction strings.
+ *
+ * ChatGPT's export used to embed custom instructions in conversation metadata;
+ * newer exports don't, so the user pastes them from Settings > Personalization
+ * > Custom instructions. Two shapes are handled: a paste that includes the UI's
+ * two question labels (split into the "about you" / "how to respond" buckets),
+ * and — the common case — an unlabeled paste of one or more blank-line-separated
+ * blocks, each kept verbatim as its own instruction. No box identity is guessed
+ * for the unlabeled shape; the text is preserved as-is.
+ */
+export function parseCustomInstructionsText(text: string): string[] {
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+
+  // Labeled shape: peel content under each recognized question label.
+  const labeled: string[] = [];
+  let frame: ((s: string) => string) | null = null;
+  let buf: string[] = [];
+  const flush = () => {
+    const body = collapseBlock(buf.join('\n'));
+    if (frame && body.length >= 3) labeled.push(frame(body));
+    buf = [];
+  };
+  for (const rawLine of trimmed.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (ABOUT_USER_LABEL.test(line)) {
+      flush();
+      frame = (s) => `What ChatGPT should know about you: ${s}`;
+    } else if (ABOUT_MODEL_LABEL.test(line)) {
+      flush();
+      frame = (s) => `How ChatGPT should respond: ${s}`;
+    } else if (frame) {
+      buf.push(line);
+    }
+  }
+  flush();
+  if (labeled.length) return labeled;
+
+  // Unlabeled shape: one instruction per blank-line-separated block, verbatim.
+  return trimmed
+    .split(/\n\s*\n/)
+    .map((block) => collapseBlock(block))
+    .filter((block) => block.length >= 3)
+    .map((block) => `Custom instruction: ${block}`);
+}

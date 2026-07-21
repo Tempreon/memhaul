@@ -32,6 +32,7 @@ PARSE OPTIONS
   --out <dir>         output directory           (default: ./memory)
   --format <name>     ${AVAILABLE_FORMATS.join(' | ')}   (default: markdown)
   --memories <file>   paste of your saved memories (needed for ChatGPT; older Claude exports)
+  --instructions <file>  paste of your ChatGPT custom instructions (newer exports omit them)
   --include-derived   also emit memory inferred from conversations (guesses)
   --dry-run           show what would be written; write nothing
   --quiet             only print the summary line
@@ -40,6 +41,7 @@ AUDIT OPTIONS
   --source <name>     chatgpt | claude | auto   (default: auto-detect)
   --out <dir>         where to write the report  (default: ./memory)
   --memories <file>   include your pasted saved memories in the audit
+  --instructions <file>  include your pasted ChatGPT custom instructions in the audit
   --card              also write a redacted, shareable audit-card.md
   --json              print findings as JSON to stdout (writes nothing)
 
@@ -104,6 +106,17 @@ function readMemories(args: ReturnType<typeof parseArgs>): string | undefined {
   }
 }
 
+/** Read the --instructions paste file, if the user supplied one. */
+function readInstructions(args: ReturnType<typeof parseArgs>): string | undefined {
+  const path = optString(args, 'instructions');
+  if (!path) return undefined;
+  try {
+    return readFileSync(path, 'utf-8');
+  } catch (err) {
+    throw new UsageError(`Cannot read --instructions file "${path}": ${(err as Error).message}`);
+  }
+}
+
 function cmdParse(argv: string[]): number {
   const args = parseArgs(
     argv,
@@ -123,6 +136,7 @@ function cmdParse(argv: string[]): number {
     source,
     includeDerived,
     savedMemoriesText: readMemories(args),
+    customInstructionsText: readInstructions(args),
   });
 
   if (!quiet && !source) {
@@ -172,6 +186,7 @@ function cmdAudit(argv: string[]): number {
     source,
     includeDerived: true,
     savedMemoriesText: readMemories(args),
+    customInstructionsText: readInstructions(args),
   });
   const report = runAudit(memory);
 
@@ -221,6 +236,7 @@ async function cmdPush(argv: string[]): Promise<number> {
   const { memory } = parseExport(archive, {
     source,
     savedMemoriesText: readMemories(args),
+    customInstructionsText: readInstructions(args),
   });
   const target = new TempreonPushTarget();
   const result = await target.push(memory, { dryRun });

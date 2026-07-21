@@ -33,6 +33,13 @@ First working version. Built-not-launched.
   export memory" copy is corrected across the README, the adapter, and the docs.
 - Multi-batch Claude exports: pointed at one `…-batch-0000.zip`, memhaul now merges its
   `…-batch-NNNN.zip` siblings so nothing after the first batch is silently dropped.
+- ChatGPT custom instructions: newer ChatGPT exports no longer embed custom instructions in
+  conversation metadata, so the recovery path finds nothing on a fresh export. Added `--instructions
+  <file>` to paste them in (from Settings → Personalization → Custom instructions), tolerant of both
+  the labeled two-box format and an unlabeled paste; the metadata path still runs for older exports
+  but is no longer advertised as the expected outcome. When no instructions are found and none are
+  pasted, the run now says so and points at the paste route. README quickstart updated to match a
+  fresh export.
 
 ### Guarantees
 - `parse` and `audit` make no network calls. No telemetry. One runtime dependency (`fflate`).

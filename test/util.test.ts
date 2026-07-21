@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseArgs, optString, optBool } from '../src/util/args.js';
 import { maskEmail, redactInline } from '../src/util/redact.js';
-import { parseSavedMemoriesText, unixToIso } from '../src/sources/shared.js';
+import { parseCustomInstructionsText, parseSavedMemoriesText, unixToIso } from '../src/sources/shared.js';
 
 test('parseArgs handles booleans, values, =, positionals, and --', () => {
   const a = parseArgs(
@@ -37,6 +37,33 @@ test('parseSavedMemoriesText strips bullets and framing', () => {
     'Here are your saved memories:\n- Likes tea\n2. Lives in Austin\n• Uses a Mac\n\n  \n',
   );
   assert.deepEqual(lines, ['Likes tea', 'Lives in Austin', 'Uses a Mac']);
+});
+
+test('parseCustomInstructionsText: unlabeled blocks become one instruction each', () => {
+  const out = parseCustomInstructionsText(
+    'I prefer Go and Postgres.\nI work in Mountain time.\n\nBe concise and direct.',
+  );
+  assert.deepEqual(out, [
+    'Custom instruction: I prefer Go and Postgres. I work in Mountain time.',
+    'Custom instruction: Be concise and direct.',
+  ]);
+});
+
+test('parseCustomInstructionsText: labeled paste splits into the two ChatGPT boxes', () => {
+  const out = parseCustomInstructionsText(
+    'What would you like ChatGPT to know about you to provide better responses?\n' +
+      'I am a backend engineer.\n\n' +
+      'How would you like ChatGPT to respond?\n' +
+      'Keep it short.',
+  );
+  assert.deepEqual(out, [
+    'What ChatGPT should know about you: I am a backend engineer.',
+    'How ChatGPT should respond: Keep it short.',
+  ]);
+});
+
+test('parseCustomInstructionsText: empty or whitespace paste yields nothing', () => {
+  assert.deepEqual(parseCustomInstructionsText('   \n\n  '), []);
 });
 
 test('unixToIso tolerates seconds and rejects junk', () => {

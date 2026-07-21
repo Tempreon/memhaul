@@ -1,0 +1,4 @@
+I'm a backend engineer who prefers Go and Postgres. I work in the Mountain time zone,
+and I like short variable names.
+
+Be concise and direct. Skip the preamble and give me the command or code first.

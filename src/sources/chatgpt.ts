@@ -8,7 +8,7 @@ import {
 import { VERSION } from '../version.js';
 import type { Archive } from '../util/zip.js';
 import type { ExtractOptions, SourceAdapter } from './types.js';
-import { parseSavedMemoriesText, unixToIso } from './shared.js';
+import { parseCustomInstructionsText, parseSavedMemoriesText, unixToIso } from './shared.js';
 
 /** Minimal shapes we read from the export. Everything is optional / defensive. */
 interface RawNode {
@@ -56,6 +56,14 @@ const MEMORY_MISSING_WARNING =
   'open ChatGPT > Settings > Personalization > Memory > Manage memories, copy the list into a ' +
   'text file, and re-run with `--memories <file>`. (Or ask ChatGPT: "Print all of my saved ' +
   'memories verbatim as a list", and save that.) What follows was recovered from the export itself.';
+
+// Newer ChatGPT exports stopped embedding custom instructions in conversation
+// metadata, so on a fresh export the recovery path below finds nothing. Say so
+// plainly and point at the paste route — the same honest-gap pattern as memory.
+const INSTRUCTIONS_MISSING_WARNING =
+  'No custom instructions were found in this export — newer ChatGPT exports no longer include ' +
+  'them. To add them: open ChatGPT > Settings > Personalization > Custom instructions, copy both ' +
+  'boxes into a text file, and re-run with `--instructions <file>`.';
 
 function safeJson<T>(text: string | undefined, warnings: string[], label: string): T | undefined {
   if (text === undefined) return undefined;
@@ -195,6 +203,9 @@ export class ChatGptAdapter implements SourceAdapter {
         }
       }
     }
+    // Metadata path — still works on OLDER exports, but no longer the expected
+    // outcome: fresh exports carry nothing here.
+    let instructionCount = 0;
     if (latestCi) {
       const iso = unixToIso(latestCi.at);
       const note = 'reconstructed from your chats; may be older than your current settings';
@@ -206,6 +217,7 @@ export class ChatGptAdapter implements SourceAdapter {
             note,
           ),
         );
+        instructionCount++;
       }
       if (latestCi.about_model?.trim()) {
         items.push(
@@ -215,7 +227,21 @@ export class ChatGptAdapter implements SourceAdapter {
             note,
           ),
         );
+        instructionCount++;
       }
+    }
+
+    // Paste route — the reliable way to bring instructions in from a fresh
+    // export. Additive to anything the metadata path recovered.
+    if (opts.customInstructionsText?.trim()) {
+      const pasted = parseCustomInstructionsText(opts.customInstructionsText);
+      for (const text of pasted) items.push(pastedInstructionItem(text));
+      instructionCount += pasted.length;
+      if (!pasted.length) {
+        warnings.push('The --instructions file was provided but no instructions were found in it.');
+      }
+    } else if (instructionCount === 0) {
+      warnings.push(INSTRUCTIONS_MISSING_WARNING);
     }
 
     // --- Saved memories (must be pasted; not in the export) ---
@@ -281,6 +307,16 @@ function instructionItem(text: string, createdAt: string | undefined, note: stri
     source: 'chatgpt',
     ...(createdAt ? { createdAt } : {}),
     provenance: { file: 'conversations.json', note },
+  };
+}
+
+function pastedInstructionItem(text: string): MemoryItem {
+  return {
+    id: makeItemId('chatgpt', 'custom_instruction', text, '(pasted custom instructions)'),
+    text,
+    kind: 'custom_instruction',
+    source: 'chatgpt',
+    provenance: { file: '(pasted custom instructions)' },
   };
 }
 

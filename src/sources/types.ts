@@ -19,6 +19,14 @@ export interface ExtractOptions {
    * ignored — a fresher hand copy can supplement it.
    */
   savedMemoriesText?: string;
+  /**
+   * Raw text of the user's custom instructions, pasted from a file. Newer
+   * ChatGPT exports no longer embed custom instructions in conversation
+   * metadata, so the user copies them from Settings > Personalization > Custom
+   * instructions into a text file and passes `--instructions <file>`. Additive
+   * to anything the metadata path still recovers from older exports.
+   */
+  customInstructionsText?: string;
 }
 
 /**

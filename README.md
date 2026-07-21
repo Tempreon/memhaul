@@ -21,36 +21,52 @@ Local-first. MIT-licensed. Zero telemetry. One dependency. **No network calls** 
 $ memhaul parse chatgpt-export.zip
 Detected a ChatGPT export (confidence 85%).
 
-1 note(s):
+2 note(s):
   - ChatGPT does NOT include your Saved Memories in its data export. To bring them in: open
     ChatGPT > Settings > Personalization > Memory > Manage memories, copy the list into a text
     file, and re-run with --memories <file>.
+  - No custom instructions were found in this export — newer ChatGPT exports no longer include
+    them. Add them from Settings > Personalization > Custom instructions with --instructions <file>.
 
-Extracted 4 memory item(s) from your ChatGPT export (0 saved, 2 instructions, 2 profile).
+Extracted 2 memory item(s) from your ChatGPT export (0 saved, 0 instructions, 2 profile).
 Open memory/README.md to read them.
 ```
 
-Right away it tells you the thing nobody else does: **your saved memories aren't in the export.** What
-it *did* pull out is already clean Markdown:
+Right away it tells you the two things nobody else does: on a current ChatGPT export, **neither your
+saved memories nor your custom instructions come out** — the export dropped the custom-instruction
+metadata memhaul used to recover. What it *did* pull out is already clean Markdown:
+
+```
+memory/
+├── README.md   ← index: what came through, from where
+└── profile.md  ← account facts from the export
+```
+
+Paste in what the export leaves out (both are a 15-second copy from Settings) and the folder fills in:
+
+```console
+$ memhaul parse chatgpt-export.zip --memories my-memories.txt --instructions my-instructions.txt
+Extracted 15 memory item(s) from your ChatGPT export (11 saved, 2 instructions, 2 profile).
+```
 
 ```
 memory/
 ├── README.md              ← index: what came through, from where
+├── saved-memories.md      ← the memories you pasted in
 ├── custom-instructions.md ← your standing instructions
 └── profile.md             ← account facts from the export
 ```
 
-Add your memories (next section) and you also get `saved-memories.md`; add `--include-derived` and you
-get `derived-candidates.md`. Each memory is a plain bullet you can read, edit, or delete, with a note
-on exactly where it came from:
+Add `--include-derived` and you also get `derived-candidates.md`. Each memory is a plain bullet you can
+read, edit, or delete, with a note on exactly where it came from:
 
 ```markdown
 # Custom instructions
 
 > Standing instructions and preferences you set for the assistant.
 
-- What ChatGPT should know about you: I prefer TypeScript and I work at Acme.
-  added 2024-03-09 — source: conversations.json
+- Custom instruction: Be concise and direct — give me the command or code first.
+  source: (pasted custom instructions)
 ```
 
 ## Memory: Claude exports it now, ChatGPT still doesn't
@@ -64,11 +80,13 @@ $ memhaul parse claude-export.zip --claude
 Extracted 24 memory item(s) from your Claude export (19 saved, 3 instructions, 2 profile).
 ```
 
-**ChatGPT** ships your whole chat history but **not** your Saved Memories — those still live only in
-**Settings → Personalization → Memory**. Copy that list into a text file and pass it in:
+**ChatGPT** ships your whole chat history but exports **neither your Saved Memories nor your custom
+instructions** anymore — Saved Memories live in **Settings → Personalization → Memory**, and custom
+instructions (which current exports no longer embed) in **Settings → Personalization → Custom
+instructions**. Copy each into a text file and pass them in:
 
 ```console
-$ memhaul parse chatgpt-export.zip --memories my-memories.txt
+$ memhaul parse chatgpt-export.zip --memories my-memories.txt --instructions my-instructions.txt
 Extracted 15 memory item(s) from your ChatGPT export (11 saved, 2 instructions, 2 profile).
 ```
 

@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openArchive } from '../src/util/zip.js';
 import { parseExport, detectSource } from '../src/sources/index.js';
@@ -10,6 +12,31 @@ const memoriesText = readFileSync(
   fileURLToPath(new URL('./fixtures/saved-memories.txt', import.meta.url)),
   'utf-8',
 );
+const instructionsText = readFileSync(
+  fileURLToPath(new URL('./fixtures/chatgpt-instructions.txt', import.meta.url)),
+  'utf-8',
+);
+
+/** A minimal fresh-style export: a conversation with no custom-instruction metadata. */
+function freshExportDir(): string {
+  const d = mkdtempSync(join(tmpdir(), 'mp-gpt-fresh-'));
+  writeFileSync(
+    join(d, 'conversations.json'),
+    JSON.stringify([
+      {
+        title: 'hi',
+        mapping: {
+          root: {
+            id: 'root',
+            message: { author: { role: 'user' }, content: { content_type: 'text', parts: ['hello'] } },
+            children: [],
+          },
+        },
+      },
+    ]),
+  );
+  return d;
+}
 
 test('auto-detects a ChatGPT export by its mapping tree', () => {
   const d = detectSource(openArchive(dir));
@@ -38,6 +65,36 @@ test('warns that ChatGPT does not export saved memories when none are pasted', (
   const { memory } = parseExport(openArchive(dir), { source: 'chatgpt' });
   assert.equal(memory.items.filter((i) => i.kind === 'saved_memory').length, 0);
   assert.ok(memory.warnings.some((w) => /does NOT include your Saved Memories/i.test(w)));
+});
+
+test('a fresh export with no custom-instruction metadata warns and points at --instructions', () => {
+  const { memory } = parseExport(openArchive(freshExportDir()), { source: 'chatgpt' });
+  assert.equal(memory.items.filter((i) => i.kind === 'custom_instruction').length, 0, 'metadata path finds nothing');
+  assert.ok(memory.warnings.some((w) => /no longer include them/i.test(w)), 'honest gap warning');
+  assert.ok(memory.warnings.some((w) => /--instructions <file>/.test(w)), 'points at the paste route');
+});
+
+test('--instructions paste brings custom instructions in from a fresh export', () => {
+  const { memory } = parseExport(openArchive(freshExportDir()), {
+    source: 'chatgpt',
+    customInstructionsText: instructionsText,
+  });
+  const ci = memory.items.filter((i) => i.kind === 'custom_instruction');
+  assert.ok(ci.length >= 2, `got ${ci.length} instructions`);
+  assert.ok(ci.some((i) => /Go and Postgres/i.test(i.text)));
+  assert.ok(ci.some((i) => /concise and direct/i.test(i.text)));
+  assert.ok(ci.every((i) => i.provenance.file === '(pasted custom instructions)'));
+  assert.ok(!memory.warnings.some((w) => /no longer include them/i.test(w)), 'no gap warning once pasted');
+});
+
+test('pasted instructions are additive to metadata-recovered ones (older export)', () => {
+  const { memory } = parseExport(openArchive(dir), {
+    source: 'chatgpt',
+    customInstructionsText: 'Always use metric units.',
+  });
+  const ci = memory.items.filter((i) => i.kind === 'custom_instruction').map((i) => i.text);
+  assert.ok(ci.some((t) => /I prefer TypeScript and I work at Acme/.test(t)), 'metadata instruction still present');
+  assert.ok(ci.some((t) => /Always use metric units/i.test(t)), 'pasted instruction added');
 });
 
 test('includes pasted saved memories and skips framing lines', () => {
