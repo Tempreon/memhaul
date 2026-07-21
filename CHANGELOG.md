@@ -41,6 +41,15 @@ First working version. Built-not-launched.
   pasted, the run now says so and points at the paste route. README quickstart updated to match a
   fresh export.
 
+### Changed
+- Runtime floor raised from Node 18 to Node **20** (`engines`): Node 18 and 20 are both past LTS,
+  but the CLI uses no APIs newer than Node 20, so a still-installed Node 20 parses fine. Tested on
+  Node 22 and 24; a `>=22` floor will be reconsidered at v0.2. README and CONTRIBUTING updated to
+  match.
+- CI actions bumped to the current majors that target the Node 24 runner runtime
+  (`actions/checkout@v7`, `actions/setup-node@v7` in `ci.yml` and `release.yml`), clearing the
+  "Node.js 20 is deprecated" runner annotations.
+
 ### Guarantees
 - `parse` and `audit` make no network calls. No telemetry. One runtime dependency (`fflate`).
 - Reads are non-destructive; output is deterministic and diffable.

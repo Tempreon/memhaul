@@ -168,7 +168,7 @@ including ours.
 
 ## Install / develop
 
-Requires Node 18+ to run (Node 22+ to develop — the test runner uses `node --test` glob support). Until it's on npm, run from source:
+Requires Node 20+ to run (tested on 22 and 24; Node 22+ to develop — the test runner uses `node --test` glob support). Until it's on npm, run from source:
 
 ```console
 git clone https://github.com/Tempreon/memhaul
