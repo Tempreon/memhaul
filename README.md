@@ -197,4 +197,4 @@ personal data.**
 
 [MIT](LICENSE) © Briggs Ventures LLC
 
-<sub>Built by the team behind [Tempreon](https://tempreon.com). memhaul is a standalone MIT tool and works completely on its own.</sub>
+<sub>Built by the team behind [Tempreon](https://tempreon.com/?utm_source=memhaul&utm_medium=readme). memhaul is a standalone MIT tool and works completely on its own.</sub>
